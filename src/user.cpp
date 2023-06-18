@@ -1,11 +1,8 @@
 #include "user.h"
 
-int User::userNumbers = 0;
-
 User::User()
 {
-    m_ID = userNumbers;
-    userNumbers++;
+
 }
 
 User::User(const std::string& name)
@@ -39,4 +36,9 @@ void User::setName(const std::string& name)
 void User::setPassword(const std::string& password)
 {
     m_password = password;
+}
+
+void User::setId(int id)
+{
+    m_ID = id;
 }

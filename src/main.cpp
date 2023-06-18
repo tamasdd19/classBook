@@ -47,18 +47,22 @@ int main()
 }*/
 
 int callbackFunction(void* data, int argc, char** argv, char** columnNames) {
+    int* match = static_cast<int*>(data); // Cast the data pointer to an integer pointer
+
     // Process each row of the result
     for (int i = 0; i < argc; i++) {
-        // Print column name and value
-        std::cout << columnNames[i] << ": " << argv[i] << std::endl;
+        // Compare the ID and password values
+        if (std::stoi(argv[0]) == match[0] && std::string(argv[2]) == match[1]) {
+            // ID and password match
+            *match = 1;
+            break;
+        }
     }
-    std::cout << std::endl;
 
     return 0;
 }
 
-int main()
-{
+int main() {
     Major major("Info", 1);
     Student student("Test", major), student2;
     sqlite3* db;
@@ -68,23 +72,29 @@ int main()
         // Database opened successfully
 
         // Execute SQL queries
-        const char* createTableQuery = "CREATE TABLE IF NOT EXISTS MyTable (ID INT, Name TEXT);";
-        rc = sqlite3_exec(db, createTableQuery, 0, 0, 0);
+
+        // ... (Create table and insert data queries)
 
         if (rc == SQLITE_OK) {
-            // Table created successfully
+            int id;
+            std::string parola;
+            std::cout << "Enter ID: ";
+            std::cin >> id;
+            std::cout << "Enter password: ";
+            std::cin >> parola;
 
-            // Execute more SQL queries, e.g., insert data
-            // const char* insertQuery = "INSERT INTO MyTable (ID, Name) VALUES (1, 'John');";
-            // rc = sqlite3_exec(db, insertQuery, 0, 0, 0);
+            int match = 0; // Variable to track if ID and password match
+            int inputData[2] = { id, parola }; // Create an array to store the ID and password
+
+            const char* selectQuery = "SELECT * FROM users;";
+            rc = sqlite3_exec(db, selectQuery, callbackFunction, &match, 0);
 
             if (rc == SQLITE_OK) {
-                // Data inserted successfully
-
-                // Query data
-                const char* selectQuery = "SELECT * FROM MyTable;";
-                rc = sqlite3_exec(db, selectQuery, callbackFunction, 0, 0);
-                // You would need to define the callback function to process the query results
+                if (match == 1) {
+                    std::cout << "ID and password match." << std::endl;
+                } else {
+                    std::cout << "ID and password do not match." << std::endl;
+                }
             }
         }
 
