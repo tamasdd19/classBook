@@ -10,8 +10,8 @@ Major::Major(const std::string& name)
 {
 
 }
-Major::Major(const std::string& name, int year)
-    : m_majorName(name), m_majorYear(year)
+Major::Major(int id, const std::string& name, int year)
+    : m_majorId(id), m_majorName(name), m_majorYear(year)
 {
 
 }
@@ -23,28 +23,51 @@ Major::Major(const std::string& name, int year, const std::vector<Course*>& cour
 }
 
 // Getters
-std::string Major::getMajorName() const
+std::string Major::getName() const
 {
     return m_majorName;
 }
 
-int Major::getMajorYear() const
+int Major::getYear() const
 {
     return m_majorYear;
 }
 
+std::vector<Course*> Major::getCourses() const
+{
+    return m_courses;
+}
+
 // Setters
-void Major::setMajorName(const std::string& name)
+void Major::setName(const std::string& name)
 {
     m_majorName = name;
 }
 
-void Major::setMajorYear(int year)
+void Major::setYear(int year)
 {
     m_majorYear = year;
 }
 
-void Major::setMajorCourses(const std::vector<Course*>& courses)
+void Major::setCourses(const std::vector<Course*>& courses)
 {
     m_courses = courses;
+}
+int Major::getId() const
+{
+    return m_majorId;
+}
+
+int Major::getFacultyId() const
+{
+    return m_facultyId;
+}
+
+void Major::setId(int id)
+{
+    m_majorId = id;
+}
+void Major::setFacultyId(int id)
+{
+    m_facultyId = id;
 }

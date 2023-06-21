@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <windows.h>
+#include <string.h>
 #include "button.h"
 #include "professor.h"
 #include "student.h"
@@ -45,55 +46,143 @@ int main()
     
     return 0;
 }*/
+struct myData
+{
+    std::string name, password;
+    bool gasit = false;
+};
 
-int callbackFunction(void* data, int argc, char** argv, char** columnNames) {
-    int* match = static_cast<int*>(data); // Cast the data pointer to an integer pointer
+bool login = false;
+User* user;
 
-    // Process each row of the result
-    for (int i = 0; i < argc; i++) {
-        // Compare the ID and password values
-        if (std::stoi(argv[0]) == match[0] && std::string(argv[2]) == match[1]) {
-            // ID and password match
-            *match = 1;
-            break;
+int callbackFunction(void* data, int argc, char** argv, char** columnNames) 
+{
+    myData* mydata = static_cast<myData*>(data);
+    for (int i = 0; i < argc; i++) 
+    {
+        if(!strcmp(columnNames[i], "name"))
+        {
+            std::string checkName = argv[i];
+            if(checkName == mydata->name)
+            {
+                mydata->gasit = true;
+                std::string checkPass = argv[i+1];
+                if(checkPass == mydata->password) // User has logged in
+                {
+                    if(std::stoi(argv[i+2]))
+                    {
+                        user = new Student(mydata->name, std::stoi(argv[i+3]));
+                    }
+                    else
+                    {
+                        user = new Professor(mydata->name);
+                    }
+                    user->setId(std::stoi(argv[i-1]));
+                    std::cout << user->getName() << " has logged in!\n";
+                    login = true;
+                    break;
+                }
+                else
+                {
+                    std::cout << "Incorrect password!\n";
+                    break;
+                }
+            }
         }
     }
-
     return 0;
 }
 
-int main() {
-    Major major("Info", 1);
-    Student student("Test", major), student2;
+int getMajor(void* data, int argc, char** argv, char** columnNames) 
+{
+    Major* major = static_cast<Major*>(data);
+    major->setId(std::stoi(argv[0]));
+    major->setName(argv[1]);
+    std::cout << major->getName();
+    major->setYear(std::stoi(argv[2]));
+    major->setFacultyId(std::stoi(argv[3]));
+    return 0;
+}
+
+struct MyData2
+{
+    std::vector<Course*> courses;
+    int id;
+};
+
+int setMajorCourses(void* data, int argc, char** argv, char** columnNames) 
+{
+    MyData2* data2 = static_cast<MyData2*>(data);
+    Course* course;
+    course = new Course(std::stoi(argv[0]), argv[1], data2->id);
+    data2->courses.push_back(course);
+    return 0;
+}
+
+int main() 
+{
+    Student* student; // in case the user is a student, to be able tu use student functions
+    Professor* professor;
     sqlite3* db;
-    int rc = sqlite3_open("database.db", &db); // Open the database file
+    int rc = sqlite3_open("database.db", &db);
 
-    if (rc == SQLITE_OK) {
-        // Database opened successfully
-
-        // Execute SQL queries
-
-        // ... (Create table and insert data queries)
-
-        if (rc == SQLITE_OK) {
-            int id;
-            std::string parola;
-            std::cout << "Enter ID: ";
-            std::cin >> id;
+    if (rc == SQLITE_OK) 
+    {
+        // Login phase, a very primitive version of it, but it works kind of
+        if (rc == SQLITE_OK) 
+        {
+            std::string name, password;
+            std::cout << "Enter name: ";
+            std::getline(std::cin, name);
             std::cout << "Enter password: ";
-            std::cin >> parola;
-
-            int match = 0; // Variable to track if ID and password match
-            int inputData[2] = { id, parola }; // Create an array to store the ID and password
+            std::cin >> password;
+            myData data;
+            data.name = name;
+            data.password = password;
 
             const char* selectQuery = "SELECT * FROM users;";
-            rc = sqlite3_exec(db, selectQuery, callbackFunction, &match, 0);
+            rc = sqlite3_exec(db, selectQuery, callbackFunction, &data, 0);
 
-            if (rc == SQLITE_OK) {
-                if (match == 1) {
-                    std::cout << "ID and password match." << std::endl;
-                } else {
-                    std::cout << "ID and password do not match." << std::endl;
+            if (rc == SQLITE_OK) 
+            {
+                // Still have to do connection after I log in somehow, somethink to do for later
+                if(login)
+                {  
+                    // Primitive version of being logged in, I can't to anything for now :((
+                    // std::cout << name << "\nhas logged in!\n";
+                    Major* major = new Major;
+                    student = static_cast<Student*>(user);
+                    //  student->getMajorId();
+                    std::string selectQuery;
+                    selectQuery = "SELECT * FROM major WHERE id = ";
+                    selectQuery += std::to_string(student->getMajorId());
+                    selectQuery += ";";
+                    
+                    rc = sqlite3_exec(db, selectQuery.c_str(), getMajor, major, 0); // GetMajor gets de id and name of the major
+                    
+                    selectQuery.replace(14, 5, "courses");
+                    selectQuery.replace(selectQuery.find("id"), 2, "majorId");
+
+                    MyData2 data2;
+                    data2.id = major->getId();
+
+                    rc = sqlite3_exec(db, selectQuery.c_str(), setMajorCourses, &data2, 0); // SetMajor sets the major courses up
+                    if(rc == SQLITE_OK)
+                    {
+                        major->setCourses(data2.courses);
+
+                        student->setMajor(major);
+
+                        std::cout << student->getName() << " studiaza " << student->getMajor()->getName() << " si are urmatoarele cursuri: \n";
+                        for(auto& i : student->getMajor()->getCourses())
+                        {
+                            std::cout << i->getName() << std::endl;
+                        }
+                    }
+                }
+                else if(!data.gasit)
+                {
+                    std::cout << name << " doesn't exist in the users database\n";
                 }
             }
         }

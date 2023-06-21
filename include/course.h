@@ -8,14 +8,19 @@ class Course
 {
 public:
     Course();
+    Course(int, const std::string&, int);
     // Getters
     std::string getName() const;
-    int getID() const;
+    int getId() const;
     std::vector<int> getStudents() const;
     std::vector<int> getProfessors() const;
+    // Setters
+    void setId(int);
+    void setMajorId(int);
+    void setName(const std::string&);
 protected:
-    int m_ID;
-    std::string m_courseName;
+    int m_Id, m_majorId;
+    std::string m_name;
     std::vector<int> m_professors; // professors id
     std::vector<int> m_students;   // student    ids
 };

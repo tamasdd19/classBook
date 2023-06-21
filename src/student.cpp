@@ -6,25 +6,41 @@ Student::Student()
 
 }
 
-Student::Student(const std::string& name)
-    : User(name)
+Student::Student(const std::string& name, int majorId)
+    : User(name), m_majorId(majorId)
 {
     
 }
 
-Student::Student(const std::string& name, const Major& major)
-    : User(name)
+int Student::getMajorId() const
 {
-    this->setMajorName(major.getMajorName());
-    this->setMajorYear(major.getMajorYear());
+    return m_majorId;
 }
 
-void Student::addCourse(StudentCourse& course)
+void Student::setMajor(Major* major)
 {
-    m_courses.push_back(&course);
+    m_major = major;
 }
 
-void Student::setCourses(const std::vector<StudentCourse*>& courses)
+Major* Student::getMajor() const
 {
-    m_courses = courses;
+    return m_major;
 }
+
+
+// Student::Student(const std::string& name, const Major& major)
+//     : User(name)
+// {
+//     this->setMajorName(major.getMajorName());
+//     this->setMajorYear(major.getMajorYear());
+// }
+
+// void Student::addCourse(StudentCourse& course)
+// {
+//     m_courses.push_back(&course);
+// }
+
+// void Student::setCourses(const std::vector<StudentCourse*>& courses)
+// {
+//     m_courses = courses;
+// }
