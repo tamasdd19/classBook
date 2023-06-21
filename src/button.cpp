@@ -3,7 +3,12 @@
 
 int Button::m_buttonsTotalHeight = SPACE_BETWEEN_LINES;
 
-Button::Button(sf::Vector2f position, sf::Vector2f size, std::string text, sf::Font& font) 
+Button::Button()
+{
+
+}
+
+Button::Button(sf::Vector2f position, sf::Vector2f size, std::string text, sf::Font& font, int textSize) 
 {
     m_button.setSize(size);
     m_button.setPosition(position);
@@ -13,7 +18,7 @@ Button::Button(sf::Vector2f position, sf::Vector2f size, std::string text, sf::F
 
     m_text.setFont(font);
     m_text.setString(text);
-    m_text.setCharacterSize(24);
+    m_text.setCharacterSize(textSize);
     m_text.setFillColor(sf::Color::Black);
 
     sf::FloatRect textRect = m_text.getLocalBounds();
@@ -22,10 +27,10 @@ Button::Button(sf::Vector2f position, sf::Vector2f size, std::string text, sf::F
     Button::m_buttonsTotalHeight+=size.y + SPACE_BETWEEN_LINES;
 }
 
-Button::Button(sf::Vector2f (*function)(const sf::Vector2u&, const sf::Vector2f&), const sf::Vector2u& windowSize, sf::Vector2f size, std::string text, sf::Font& font)
+Button::Button(sf::Vector2f (*function)(const sf::Vector2u&, const sf::Vector2f&), const sf::Vector2u& windowSize, sf::Vector2f size, std::string text, sf::Font& font, int textSize)
 {
     sf::Vector2f position=function(windowSize, size);
-    new (this) Button(position, size, text, font);
+    new (this) Button(position, size, text, font, textSize);
 }
 
 sf::Vector2f Button::setCenter(const sf::Vector2u& windowSize, const sf::Vector2f& size)
@@ -109,3 +114,18 @@ void Button::isMouseOverFunction(void (*function)(Button&), Button& b)
 {
     function(b);
 }
+
+sf::Vector2f Button::getPosition() const
+{
+    return m_button.getPosition();
+}
+
+void Button::setText(const std::string& text)
+{
+    m_text.setString(text);
+}
+
+void Button::setTextPosition(const sf::Vector2f& position, const sf::Vector2f& size)
+{
+    m_text.setPosition(position.x, position.y + 0.25*size.y);
+}   

@@ -4,48 +4,103 @@
 #include <windows.h>
 #include <string.h>
 #include "button.h"
+#include "input.h"
 #include "professor.h"
 #include "student.h"
 #include "course.h"
 #include "sql/sqlite3.h"
 
-/*#define SLEEP_TIME 0
+#define SLEEP_TIME 0
 
 int main()
 {
-    /*
-    sf::RenderWindow window(sf::VideoMode(640, 480), "Testing!");//, sf::Style::Titlebar | sf::Style::Close);
+    sf::RenderWindow window(sf::VideoMode(1280, 720), "ClassBook", sf::Style::Titlebar | sf::Style::Close);
+
     sf::Font font;
     font.loadFromFile("src/arial.ttf");
-    std::string text="da";
-    bool apasat = false;
 
-    Button button(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Catalog online yay", font);
-    Button button2(&Button::setLeft, window.getSize(), sf::Vector2f(200.f, 50.f),  "buton2", font);
-    Button button3(&Button::setLeft, window.getSize(), sf::Vector2f(200.f, 50.f),  "buton3", font);
+    Button button(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 100.f), "ClassBook!", font, 35);
+    Button button2(&Button::setLeft, window.getSize(), sf::Vector2f(200.f, 50.f), "buton2", font);
+    Button button3(&Button::setLeft, window.getSize(), sf::Vector2f(200.f, 50.f), "buton3", font);
+    TextInput textInput(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 50.f), font);
+    TextInput passInput(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 50.f), font);
+
+
 
     window.setFramerateLimit(60);
 
     while (window.isOpen())
     {
         sf::Event event;
-        while(window.pollEvent(event))
+        while (window.pollEvent(event))
         {
-            switch(event.type)
+            switch (event.type)
             {
-            case sf::Event::Closed:
-                window.close();
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if (event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        if(textInput.isMouseOver(window))
+                        {   // this works, great! 
+                            textInput.setSelected(true);
+                            textInput.addCursor();
+                        }
+                        else
+                        {
+                            if(textInput.getSelected())
+                            {
+                                textInput.setSelected(false);
+                                textInput.removeCursor();
+                            }
+                        }
+                    }
+                    break;
+            case sf::Event::TextEntered:
+                if (event.text.unicode < 128 && textInput.getSelected())
+                {
+                    if (event.text.unicode == '\b' && !textInput.getText().empty()) // Handle backspace
+                    {
+                        textInput.deleteCharacter();
+                    }
+                    else
+                    {
+                        textInput.appendCharacter(static_cast<char>(event.text.unicode));
+                    }
+                }
+                break;
+            case sf::Event::KeyPressed:
+                if(event.key.code == sf::Keyboard::Return)
+                {
+                    if(textInput.getSelected())
+                    {
+                        textInput.removeCursor();
+                        textInput.setSelected(false);
+                    }
+                    std::cout << textInput.getText() << std::endl;
+                    textInput.clearText();
+                }
+                break;
+            default:
                 break;
             }
         }
+
+        textInput.update();
+
         window.clear();
+        textInput.draw(window);
+        passInput.draw(window);
         button.draw(window);
         window.display();
     }
-    
-    
+
     return 0;
-}*/
+}
+
+
+/*
 struct myData
 {
     std::string name, password;
@@ -145,14 +200,12 @@ int main()
 
             if (rc == SQLITE_OK) 
             {
-                // Still have to do connection after I log in somehow, somethink to do for later
+                // Still have to do connection after I log in somehow, something to do for later
                 if(login)
                 {  
                     // Primitive version of being logged in, I can't to anything for now :((
-                    // std::cout << name << "\nhas logged in!\n";
                     Major* major = new Major;
                     student = static_cast<Student*>(user);
-                    //  student->getMajorId();
                     std::string selectQuery;
                     selectQuery = "SELECT * FROM major WHERE id = ";
                     selectQuery += std::to_string(student->getMajorId());
@@ -166,7 +219,7 @@ int main()
                     MyData2 data2;
                     data2.id = major->getId();
 
-                    rc = sqlite3_exec(db, selectQuery.c_str(), setMajorCourses, &data2, 0); // SetMajor sets the major courses up
+                    rc = sqlite3_exec(db, selectQuery.c_str(), setMajorCourses, &data2, 0); // setMajorCourses sets the major courses up
                     if(rc == SQLITE_OK)
                     {
                         major->setCourses(data2.courses);
@@ -193,3 +246,4 @@ int main()
 
     return 0;
 }
+*/
