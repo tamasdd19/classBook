@@ -5,95 +5,181 @@
 #include <string.h>
 #include "button.h"
 #include "input.h"
-#include "professor.h"
-#include "student.h"
-#include "course.h"
-#include "sql/sqlite3.h"
+#include "databaseStuff.h"
 
 #define SLEEP_TIME 0
 
+
+
 int main()
 {
+    // Back End stuff setups
+    Student* student = nullptr; // in case the user is a student, to be able tu use student functions
+    Professor* professor = nullptr;
+    sqlite3* db;
+    int rc = sqlite3_open("database.db", &db);
+    if(rc != SQLITE_OK)
+    {
+        std::cout << "Could not open up the data base!\n";
+        return 0;
+    }
+    MyData userData;
+
+    // Front End stuff setups
     sf::RenderWindow window(sf::VideoMode(1280, 720), "ClassBook", sf::Style::Titlebar | sf::Style::Close);
 
     sf::Font font;
     font.loadFromFile("src/arial.ttf");
 
-    Button button(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 100.f), "ClassBook!", font, 35);
-    Button button2(&Button::setLeft, window.getSize(), sf::Vector2f(200.f, 50.f), "buton2", font);
-    Button button3(&Button::setLeft, window.getSize(), sf::Vector2f(200.f, 50.f), "buton3", font);
+    Button title(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 100.f), "ClassBook!", font, 40);
+    Button errorLoginBtn(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Date incorecte!", font);
+    Button userRect(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Username", font);
     TextInput textInput(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 50.f), font);
+    Button passRect(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Password", font);
     TextInput passInput(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 50.f), font);
 
+    // textInput.setOutlineThickness(0);
+    textInput.setFillColor(sf::Color(255, 255, 255, 200));
+    textInput.setOutlineColor(sf::Color(0, 0, 0, 50));
 
+    // passInput.setOutlineThickness(0);
+    passInput.setFillColor(sf::Color(255, 255, 255, 200));
+    passInput.setOutlineColor(sf::Color(0, 0, 0, 50));
+    passInput.setIsPassword(true);
+
+    title.setFillColor(sf::Color(255, 255, 255, 20));
+    title.setOutlineThickness(0);
+    title.setTextColor(sf::Color(0, 0, 0, 250));
+
+    errorLoginBtn.setFillColor(sf::Color::Red);
+    errorLoginBtn.setOutlineColor(sf::Color::Red);
+
+    userRect.setFillColor(sf::Color(255,255,255,150));
+    // userRect.setOutlineThickness(0);
+    userRect.setOutlineColor(sf::Color(0, 0, 0, 50));
+
+    passRect.setFillColor(sf::Color(255,255,255,150));
+    // passRect.setOutlineThickness(0);
+    passRect.setOutlineColor(sf::Color(0, 0, 0, 50));
+
+    // Neaparat sa adaug ceva imagine de fundal
+    std::vector<Button*> buttonsToDraw;
+    buttonsToDraw.push_back(&title);
+    buttonsToDraw.push_back(&userRect);
+    buttonsToDraw.push_back(&textInput);
+    buttonsToDraw.push_back(&passRect);
+    buttonsToDraw.push_back(&passInput);
+
+    sf::Texture texture;
+    if(!texture.loadFromFile("img/login-page-background.jpg"))
+    {
+        std::cout << "Image not loaded";
+    }
+
+    sf::Sprite background(texture);
+    bool loginPage = true;
+    bool studentPage = false;
+    bool professorPage = false;
 
     window.setFramerateLimit(60);
+    textInput.setSelected(true);
 
     while (window.isOpen())
     {
         sf::Event event;
-        while (window.pollEvent(event))
+        if(loginPage)
         {
-            switch (event.type)
+            while (window.pollEvent(event))
             {
-                case sf::Event::Closed:
-                    window.close();
-                    break;
-                case sf::Event::MouseButtonPressed:
-                    if (event.mouseButton.button == sf::Mouse::Left)
-                    {
-                        if(textInput.isMouseOver(window))
-                        {   // this works, great! 
-                            textInput.setSelected(true);
-                            textInput.addCursor();
-                        }
-                        else
+                switch (event.type)
+                {
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+                    case sf::Event::KeyPressed:
+                        if(event.key.code == sf::Keyboard::Return)
                         {
-                            if(textInput.getSelected())
+                            if(textInput.getSelected() && passInput.getText().empty() && textInput.getText().size()>1)
                             {
                                 textInput.setSelected(false);
-                                textInput.removeCursor();
+                                passInput.setSelected(true);
+                            }
+                            else if(textInput.getText().size()>1 && passInput.getText().size()>1)
+                            {
+                                if(passInput.getSelected())
+                                    passInput.setSelected(false);
+                                if(textInput.getSelected())
+                                    textInput.setSelected(false);
+                                std::string user = textInput.getText();
+                                std::string pass = passInput.getText();
+                                pass.pop_back();
+                                textInput.clearText();
+                                passInput.clearText();
+                                std::cout <<  user << "\n" << pass << "\n";
+                                userData.name = user;
+                                userData.password = pass;
+
+                                const char* selectQuery = "SELECT * FROM users;";
+                                rc = sqlite3_exec(db, selectQuery, callbackFunction, &userData, 0);
+                                if(rc != SQLITE_OK)
+                                {
+                                    std::cout << "Error trying to connect!\n";
+                                    return 0;
+                                }
+                                else if(!userData.gasit || userData.user == nullptr)
+                                {
+                                    buttonsToDraw.push_back(&errorLoginBtn);
+                                    break;
+                                }
+                                else if(userData.student)
+                                {
+                                    student = static_cast<Student*>(userData.user);
+                                    studentPage = true;
+                                }
+                                else
+                                {
+                                    professor = static_cast<Professor*>(userData.user);
+                                    professorPage = true;
+                                }
+                                loginPage = false;
                             }
                         }
-                    }
-                    break;
-            case sf::Event::TextEntered:
-                if (event.text.unicode < 128 && textInput.getSelected())
-                {
-                    if (event.text.unicode == '\b' && !textInput.getText().empty()) // Handle backspace
-                    {
-                        textInput.deleteCharacter();
-                    }
-                    else
-                    {
-                        textInput.appendCharacter(static_cast<char>(event.text.unicode));
-                    }
+                        break;
+                    default:
+                        break;
                 }
-                break;
-            case sf::Event::KeyPressed:
-                if(event.key.code == sf::Keyboard::Return)
-                {
-                    if(textInput.getSelected())
-                    {
-                        textInput.removeCursor();
-                        textInput.setSelected(false);
-                    }
-                    std::cout << textInput.getText() << std::endl;
-                    textInput.clearText();
-                }
-                break;
-            default:
-                break;
+                textInput.handleEvent(event, window);
+                passInput.handleEvent(event, window);
             }
+
+            textInput.update();
+            passInput.update();
+
+            window.clear();
+            window.draw(background);
+            for(auto& i : buttonsToDraw)
+                i->draw(window);
+            window.display();
         }
+        else if(studentPage)
+        {
+            while(window.pollEvent(event))
+            {
+                switch(event.type)
+                {
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+                }
+            }
+            window.clear();
+            // window.draw();
+            window.display();
+        }
+        else if(professorPage)
+        {
 
-        textInput.update();
-
-        window.clear();
-        textInput.draw(window);
-        passInput.draw(window);
-        button.draw(window);
-        window.display();
+        }
     }
 
     return 0;
@@ -101,78 +187,7 @@ int main()
 
 
 /*
-struct myData
-{
-    std::string name, password;
-    bool gasit = false;
-};
 
-bool login = false;
-User* user;
-
-int callbackFunction(void* data, int argc, char** argv, char** columnNames) 
-{
-    myData* mydata = static_cast<myData*>(data);
-    for (int i = 0; i < argc; i++) 
-    {
-        if(!strcmp(columnNames[i], "name"))
-        {
-            std::string checkName = argv[i];
-            if(checkName == mydata->name)
-            {
-                mydata->gasit = true;
-                std::string checkPass = argv[i+1];
-                if(checkPass == mydata->password) // User has logged in
-                {
-                    if(std::stoi(argv[i+2]))
-                    {
-                        user = new Student(mydata->name, std::stoi(argv[i+3]));
-                    }
-                    else
-                    {
-                        user = new Professor(mydata->name);
-                    }
-                    user->setId(std::stoi(argv[i-1]));
-                    std::cout << user->getName() << " has logged in!\n";
-                    login = true;
-                    break;
-                }
-                else
-                {
-                    std::cout << "Incorrect password!\n";
-                    break;
-                }
-            }
-        }
-    }
-    return 0;
-}
-
-int getMajor(void* data, int argc, char** argv, char** columnNames) 
-{
-    Major* major = static_cast<Major*>(data);
-    major->setId(std::stoi(argv[0]));
-    major->setName(argv[1]);
-    std::cout << major->getName();
-    major->setYear(std::stoi(argv[2]));
-    major->setFacultyId(std::stoi(argv[3]));
-    return 0;
-}
-
-struct MyData2
-{
-    std::vector<Course*> courses;
-    int id;
-};
-
-int setMajorCourses(void* data, int argc, char** argv, char** columnNames) 
-{
-    MyData2* data2 = static_cast<MyData2*>(data);
-    Course* course;
-    course = new Course(std::stoi(argv[0]), argv[1], data2->id);
-    data2->courses.push_back(course);
-    return 0;
-}
 
 int main() 
 {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <iostream>
 #include "button.h"
 #define CHAR_SIZE 24
 
@@ -15,15 +16,18 @@ public:
     void removeCursor();
     void addCursor();
     void clearText();
+    void handleEvent(sf::Event&, sf::RenderWindow&);
     // void restartCursorTimer();
     // Getters
     bool getSelected() const;
     std::string getText() const;
     // Setters
     void setSelected(bool);
+    void setIsPassword(bool);
 private:
     std::string m_text;
-    bool m_selected;
+    bool m_selected = false;
+    bool m_password = false;
     // bool m_showCursor;
     // sf::Clock m_cursorTimer; IDEEA FOR THE FUTURE
 

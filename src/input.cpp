@@ -47,9 +47,66 @@ void TextInput::appendCharacter(const char& c)
     m_text += "_";
 }
 
+void TextInput::handleEvent(sf::Event& event, sf::RenderWindow& window)
+{
+    // while(window.pollEvent(event))
+    // {
+        switch(event.type)
+        {
+            case sf::Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left)
+                {
+                    if(this->isMouseOver(window) && !this->getSelected())
+                    {   // this works, great! 
+                        this->setSelected(true);
+                        // this->addCursor();
+                    }
+                    else
+                    {
+                        if(this->getSelected())
+                        {
+                            this->setSelected(false);
+                            // this->removeCursor();
+                        }
+                    }
+                }
+                break;
+            case sf::Event::TextEntered:
+                if (event.text.unicode < 128 && this->getSelected())
+                {
+                    if (event.text.unicode == '\b' && !this->getText().empty()) // Handle backspace
+                    {
+                        this->deleteCharacter();
+                    }
+                    else
+                    {
+                        this->appendCharacter(static_cast<char>(event.text.unicode));
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    // }
+}
+
 void TextInput::update()
 {
-    this->setText(m_text);
+    if(!m_password || m_text.empty())
+    {
+        this->setText(m_text);
+        return ;
+    }
+    
+    std::string aux = m_text;
+    int i=1;
+    while(aux[i]!='_')
+    {
+        aux[i] = '*';
+        i++;
+    }
+    this->setText(aux);
+    
     // if(m_selected)
     // {
     //     // if(m_cursorTimer.getElapsedTime() >= CURSOR_BLINK_TIME)
@@ -82,4 +139,13 @@ std::string TextInput::getText() const
 void TextInput::setSelected(bool selected)
 {
     m_selected = selected;
+    if(selected)
+        this->addCursor();
+    else
+        this->removeCursor();
+}
+
+void TextInput::setIsPassword(bool is)
+{
+    m_password = is;
 }
