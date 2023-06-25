@@ -21,15 +21,6 @@ int Course::getId() const
     return m_Id;
 }
 
-std::vector<int> Course::getStudents() const
-{
-    return m_students;
-}
-
-std::vector<int> Course::getProfessors() const
-{
-    return m_professors;
-}
 
 // StudentCourse::StudentCourse(const Course& course)
 // {

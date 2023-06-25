@@ -5,7 +5,7 @@ int callbackFunction(void* data, int argc, char** argv, char** columnNames)
     MyData* mydata = static_cast<MyData*>(data);
     for (int i = 0; i < argc; i++) 
     {
-        if(!strcmp(columnNames[i], "name"))
+        if(!strcmp(columnNames[i], "username"))
         {
             std::string checkName = argv[i];
 
@@ -14,7 +14,6 @@ int callbackFunction(void* data, int argc, char** argv, char** columnNames)
 
                 mydata->gasit = true;
                 std::string checkPass = argv[i+1];
-                std::cout << "parola verificata:\n" << checkPass.size() << "\nParola trimisa:\n" << mydata->password.size() << "\n";
 
                 if(checkPass == mydata->password) // User has logged in
                 {
@@ -27,14 +26,14 @@ int callbackFunction(void* data, int argc, char** argv, char** columnNames)
                     {
                         mydata->user = new Professor(mydata->name);
                     }
+                    mydata->user->setDateOfBirth(argv[i+6]);
                     mydata->user->setId(std::stoi(argv[i-1]));
-                    std::cout << mydata->user->getName() << " has logged in!\n";
+                    std::cout << mydata->user->getUsername() << " has logged in!\n";
                     break;
                 }
                 else
                 {
                     std::cout << "Incorrect password!\n";
-                    std::cout << checkPass << "  " << mydata->password;
                     break;
                 }
             }

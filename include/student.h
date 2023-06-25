@@ -10,16 +10,13 @@ class Student : public User
 {
 public:
     Student(const std::string& name, int majorId);
-    // Student(const std::string& name);
     Student();
-    // void setCourses(const std::vector<StudentCourse*>&);
-    // void addCourse(StudentCourse&);
-    // for the major stuff there are those setters
+    // Getters
     int getMajorId() const;
     Major* getMajor() const;
+    // Setters
     void setMajor(Major*);
 private:
-    std::vector<StudentCourse*> m_courses;
     int m_majorId;
     Major* m_major;
 };

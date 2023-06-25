@@ -7,14 +7,11 @@
 #include "input.h"
 #include "databaseStuff.h"
 
-#define SLEEP_TIME 0
-
-
 
 int main()
 {
     // Back End stuff setups
-    Student* student = nullptr; // in case the user is a student, to be able tu use student functions
+    Student* student = nullptr;
     Professor* professor = nullptr;
     sqlite3* db;
     int rc = sqlite3_open("database.db", &db);
@@ -31,7 +28,7 @@ int main()
     sf::Font font;
     font.loadFromFile("src/arial.ttf");
 
-    Button title(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 100.f), "ClassBook!", font, 40);
+    Button* title = new Button(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 100.f), "ClassBook!", font, 40);
     Button errorLoginBtn(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Date incorecte!", font);
     Button userRect(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Username", font);
     TextInput textInput(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 50.f), font);
@@ -47,9 +44,9 @@ int main()
     passInput.setOutlineColor(sf::Color(0, 0, 0, 50));
     passInput.setIsPassword(true);
 
-    title.setFillColor(sf::Color(255, 255, 255, 20));
-    title.setOutlineThickness(0);
-    title.setTextColor(sf::Color(0, 0, 0, 250));
+    title->setFillColor(sf::Color(255, 255, 255, 20));
+    title->setOutlineThickness(0);
+    title->setTextColor(sf::Color(0, 0, 0, 250));
 
     errorLoginBtn.setFillColor(sf::Color::Red);
     errorLoginBtn.setOutlineColor(sf::Color::Red);
@@ -62,9 +59,8 @@ int main()
     // passRect.setOutlineThickness(0);
     passRect.setOutlineColor(sf::Color(0, 0, 0, 50));
 
-    // Neaparat sa adaug ceva imagine de fundal
     std::vector<Button*> buttonsToDraw;
-    buttonsToDraw.push_back(&title);
+    buttonsToDraw.push_back(title);
     buttonsToDraw.push_back(&userRect);
     buttonsToDraw.push_back(&textInput);
     buttonsToDraw.push_back(&passRect);
@@ -77,9 +73,22 @@ int main()
     }
 
     sf::Sprite background(texture);
+    sf::Texture texture2;
+    if(!texture2.loadFromFile("img/student-page-background.jpg"))
+    {
+        std::cout << "Image not loaded";
+    }
+    sf::Sprite backgroundStudent(texture2);
+    sf::Texture texture3;
+    if(!texture3.loadFromFile("img/professor-page-background.jpg"))
+    {
+        std::cout << "Image not loaded";
+    }
+    sf::Sprite backgroundProfessor(texture3);
     bool loginPage = true;
     bool studentPage = false;
     bool professorPage = false;
+    bool keyPressed = false;
 
     window.setFramerateLimit(60);
     textInput.setSelected(true);
@@ -89,6 +98,8 @@ int main()
         sf::Event event;
         if(loginPage)
         {
+            textInput.handleEvent(event, window, keyPressed);
+            passInput.handleEvent(event, window, keyPressed);
             while (window.pollEvent(event))
             {
                 switch (event.type)
@@ -104,7 +115,7 @@ int main()
                                 textInput.setSelected(false);
                                 passInput.setSelected(true);
                             }
-                            else if(textInput.getText().size()>1 && passInput.getText().size()>1)
+                            else
                             {
                                 if(passInput.getSelected())
                                     passInput.setSelected(false);
@@ -112,10 +123,10 @@ int main()
                                     textInput.setSelected(false);
                                 std::string user = textInput.getText();
                                 std::string pass = passInput.getText();
-                                pass.pop_back();
+                                
                                 textInput.clearText();
                                 passInput.clearText();
-                                std::cout <<  user << "\n" << pass << "\n";
+
                                 userData.name = user;
                                 userData.password = pass;
 
@@ -131,9 +142,11 @@ int main()
                                     buttonsToDraw.push_back(&errorLoginBtn);
                                     break;
                                 }
-                                else if(userData.student)
+                                if(userData.student)
                                 {
                                     student = static_cast<Student*>(userData.user);
+                                    Date* test = student->getDateOfBirth();
+                                    std::cout << "Day: " << test->getDay() << "\nMonth: " << test->getMonth() << "\nYear: " << test->getYear() << "\n";
                                     studentPage = true;
                                 }
                                 else
@@ -141,15 +154,62 @@ int main()
                                     professor = static_cast<Professor*>(userData.user);
                                     professorPage = true;
                                 }
-                                loginPage = false;
+                                std::string titleText = "Welcome, ";
+                                titleText += user;
+                                loginPage = false;      
+                                sf::Vector2f position = title->getPosition();                          
+                                delete title;
+                                Button::resetButtonHeight();
+                                title = new Button(position, titleText, font, 50);
+                                title->setFillColor(sf::Color(0, 0, 0, 80));
+                                title->setOutlineThickness(0);
+                                title->setTextColor(sf::Color(255, 255, 255));
+                                title->setPositionCenter(window.getSize());
+                                
+                                buttonsToDraw.clear();
+                                buttonsToDraw.push_back(title);
+                                Button* btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "", font, 28);
+                                btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                btn->setOutlineThickness(0);
+                                delete btn;
+                                if(studentPage)
+                                {
+                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Student's Data", font, 28);
+                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                    btn->setOutlineThickness(0);
+                                    buttonsToDraw.push_back(btn);
+                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Courses", font, 28);
+                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                    btn->setOutlineThickness(0);
+                                    buttonsToDraw.push_back(btn);
+                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Exit", font, 28);
+                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                    btn->setOutlineThickness(0);
+                                    buttonsToDraw.push_back(btn);
+                                }
+                                else if(professorPage)
+                                {
+                                    title->setFillColor(sf::Color(0, 0, 0, 200));
+                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Professors's Data", font, 28);
+                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                    btn->setOutlineThickness(0);
+                                    buttonsToDraw.push_back(btn);
+                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "GradeBook", font, 28);
+                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                    btn->setOutlineThickness(0);
+                                    buttonsToDraw.push_back(btn);
+                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Exit", font, 28);
+                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                    btn->setOutlineThickness(0);
+                                    buttonsToDraw.push_back(btn);
+                                }
                             }
+
                         }
                         break;
                     default:
                         break;
                 }
-                textInput.handleEvent(event, window);
-                passInput.handleEvent(event, window);
             }
 
             textInput.update();
@@ -161,29 +221,126 @@ int main()
                 i->draw(window);
             window.display();
         }
-        else if(studentPage)
+        else if(studentPage) // Mai trebuie sa centrez text-ul de la titlu din student page si professor page, 
+        {               // o sa trebuiasca sa vad cum sa maresc chenarul mare astfel incat sa acopere tot text-ul
+            while(window.pollEvent(event)) // si raman de facut meniurile mai departe, la student si la profesor
+            {
+                auto iter = buttonsToDraw.begin();
+
+                switch(event.type)
+                {
+                    default:
+                        break;
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+
+                    case sf::Event::MouseMoved:
+                        ++iter;
+
+                        for (; iter != buttonsToDraw.end(); ++iter)
+                        {
+                            auto& i = *iter;
+                            
+                            if (i->isMouseOver(window)) 
+                            {
+                                i->setOutlineThickness(3.f);
+                                i->setOutlineColor(sf::Color::Black);
+                                i->setFillColor(sf::Color(255, 255, 255, 250));
+                            }
+                            else
+                            {
+                                i->setOutlineThickness(0);
+                                i->setFillColor(sf::Color(255, 255, 255, 200));
+                            }
+                        }
+                        break;
+                    case sf::Event::MouseButtonPressed:
+                        if (event.mouseButton.button == sf::Mouse::Left)
+                        {
+                            if(buttonsToDraw[1]->isMouseOver(window)) // Student's data
+                            {
+                                
+                            }
+                            if(buttonsToDraw[2]->isMouseOver(window)) // Courses
+                            {
+
+                            }
+                            if(buttonsToDraw[3]->isMouseOver(window)) // Exit
+                            {
+                                window.close();
+                            }
+                        }
+                        break;
+                }
+            }
+            window.clear();
+            window.draw(backgroundStudent);
+            for(auto& i : buttonsToDraw)
+                i->draw(window);
+            window.display();
+        }
+        else if(professorPage)
         {
             while(window.pollEvent(event))
             {
+                auto iter = buttonsToDraw.begin();
+
                 switch(event.type)
                 {
                     case sf::Event::Closed:
                         window.close();
                         break;
+                    case sf::Event::MouseMoved:
+                        ++iter;
+
+                        for (; iter != buttonsToDraw.end(); ++iter)
+                        {
+                            auto& i = *iter;
+                            
+                            if (i->isMouseOver(window)) 
+                            {
+                                i->setOutlineThickness(3.f);
+                                i->setOutlineColor(sf::Color::Black);
+                                i->setFillColor(sf::Color(255, 255, 255, 250));
+                            }
+                            else
+                            {
+                                i->setOutlineThickness(0);
+                                i->setFillColor(sf::Color(255, 255, 255, 200));
+                            }
+                        }
+                        break;
+                    case sf::Event::MouseButtonPressed:
+                        if (event.mouseButton.button == sf::Mouse::Left)
+                        {
+                            if(buttonsToDraw[1]->isMouseOver(window)) // Professor's Data
+                            {
+                                
+                            }
+                            if(buttonsToDraw[2]->isMouseOver(window)) // GradeBook, to give grades and stuff
+                            {
+
+                            }
+                            if(buttonsToDraw[3]->isMouseOver(window)) // Exit
+                            {
+                                window.close();
+                            }
+                        }
+                        break;
                 }
             }
             window.clear();
-            // window.draw();
+            window.draw(backgroundProfessor);
+            for(auto& i : buttonsToDraw)
+                i->draw(window);
             window.display();
         }
-        else if(professorPage)
-        {
-
-        }
     }
-
+    sqlite3_close(db);
     return 0;
 }
+
 
 
 /*

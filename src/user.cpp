@@ -8,18 +8,13 @@ User::User()
 User::User(const std::string& name)
     : User()
 {
-    m_name = name;
+    m_username = name;
 }
 
 // Getters
-std::string User::getName() const
+std::string User::getUsername() const
 {
-    return m_name;
-}
-
-std::string User::getPassword() const
-{
-    return m_password;
+    return m_username;
 }
 
 int User::getID() const
@@ -27,18 +22,110 @@ int User::getID() const
     return m_ID;
 }
 
-//Setters
-void User::setName(const std::string& name)
+std::string User::getFirstName() const
 {
-    m_name = name;
+    return m_firstName;
+}
+std::string User::getLastName() const
+{
+    return m_lastName;
+}
+std::string User::getCountryOrigin() const
+{
+    return m_countryOrigin;
+}
+bool User::getSex() const
+{
+    return m_sexM;
+}
+Date* User::getDateOfBirth() const
+{
+    return m_DoB;
 }
 
-void User::setPassword(const std::string& password)
+//Setters
+void User::setUsername(const std::string& name)
 {
-    m_password = password;
+    m_username = name;
 }
 
 void User::setId(int id)
 {
     m_ID = id;
+}
+
+void User::setFirstName(const std::string& name)
+{
+    m_firstName = name;
+}
+void User::setLastName(const std::string& name)
+{
+    m_lastName = name;
+}
+void User::setCountryOrigin(const std::string& country)
+{
+    m_countryOrigin = country;
+}
+void User::setSex(bool sexM)
+{
+    m_sexM = sexM;
+}
+void User::setDateOfBirth(const char* date)
+{
+    std::string test = date;
+    int newDate[3], k=0;
+    for(int i=0; i<test.size(); i+=2)
+    {
+        std::string temp(1, test[i]); // Convert the character to a string
+        newDate[k++] = std::stoi(temp);
+        std::cout << std::stoi(temp) << "\n";
+    }
+    if(m_DoB != nullptr)
+        delete m_DoB;
+    m_DoB = new Date(newDate[0], newDate[1], newDate[2]);
+}
+
+// Date part
+
+Date::Date()
+{
+
+}
+
+Date::Date(int day, int month, int year)
+    : m_day(day), m_month(month), m_year(year)
+{
+
+}
+
+// Getters
+int Date::getDay() const
+{
+    return m_day;
+}
+
+int Date::getMonth() const
+{
+    return m_month;
+}
+
+int Date::getYear() const
+{
+    return m_year;
+}
+
+// Setters
+void Date::setDay(int day)
+{
+    m_day = day;
+}
+
+void Date::setMonth(int month)
+{
+    m_month = month;
+}
+
+void Date::setYear(int year)
+{
+    m_year = year;
 }

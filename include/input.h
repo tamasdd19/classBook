@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Event.hpp>
 #include <iostream>
 #include "button.h"
 #define CHAR_SIZE 24
@@ -16,7 +17,7 @@ public:
     void removeCursor();
     void addCursor();
     void clearText();
-    void handleEvent(sf::Event&, sf::RenderWindow&);
+    void handleEvent(sf::Event&, sf::RenderWindow& window, bool& keyPressed);
     // void restartCursorTimer();
     // Getters
     bool getSelected() const;

@@ -3,6 +3,11 @@
 
 int Button::m_buttonsTotalHeight = SPACE_BETWEEN_LINES;
 
+void Button::resetButtonHeight()
+{
+    m_buttonsTotalHeight = SPACE_BETWEEN_LINES;
+}
+
 Button::Button()
 {
 
@@ -27,10 +32,34 @@ Button::Button(sf::Vector2f position, sf::Vector2f size, std::string text, sf::F
     Button::m_buttonsTotalHeight+=size.y + SPACE_BETWEEN_LINES;
 }
 
-Button::Button(sf::Vector2f (*function)(const sf::Vector2u&, const sf::Vector2f&), const sf::Vector2u& windowSize, sf::Vector2f size, std::string text, sf::Font& font, int textSize)
+Button::Button(sf::Vector2f (*function)(const sf::Vector2u&, const sf::Vector2f&), const sf::Vector2u& windowSize, const sf::Vector2f& size, std::string text, sf::Font& font, int textSize)
 {
     sf::Vector2f position=function(windowSize, size);
     new (this) Button(position, size, text, font, textSize);
+}
+
+Button::Button(sf::Vector2f position, std::string text, sf::Font& font, int textSize)
+{
+    m_text.setFont(font);
+    m_text.setString(text);
+    m_text.setCharacterSize(textSize);
+    m_text.setFillColor(sf::Color::Black);
+
+    // Calculate the size of the button based on the size of the text
+    sf::FloatRect textRect = m_text.getLocalBounds();
+    sf::Vector2f buttonSize(textRect.width + 60.f, textRect.height + 60.f);
+
+    m_button.setSize(buttonSize);
+    m_button.setPosition(position);
+    m_button.setFillColor(sf::Color::White);
+    m_button.setOutlineThickness(2.f);
+    m_button.setOutlineColor(sf::Color::Black);
+
+    // Center the text within the button
+    m_text.setOrigin(textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f);
+    m_text.setPosition(position.x + buttonSize.x / 2.f, position.y + buttonSize.y / 2.f);
+
+    Button::m_buttonsTotalHeight += buttonSize.y + SPACE_BETWEEN_LINES;
 }
 
 sf::Vector2f Button::setCenter(const sf::Vector2u& windowSize, const sf::Vector2f& size)
@@ -38,7 +67,6 @@ sf::Vector2f Button::setCenter(const sf::Vector2u& windowSize, const sf::Vector2
     sf::Vector2f toReturn;
     toReturn.x = windowSize.x / 2.f - size.x / 2.f;
     toReturn.y = Button::m_buttonsTotalHeight;
-    std::cout << toReturn.x << "   " << toReturn.y << std::endl;
     return toReturn;
 }
 
@@ -129,3 +157,24 @@ void Button::setTextPosition(const sf::Vector2f& position, const sf::Vector2f& s
 {
     m_text.setPosition(position.x, position.y + 0.25*size.y);
 }   
+
+void Button::setSize(const sf::Vector2f& size)
+{
+    m_button.setSize(size);
+}
+
+void Button::setPositionCenter(const sf::Vector2u& windowSize)
+{
+    float x = windowSize.x / 2.f - m_button.getSize().x / 2.f;
+    float y = m_button.getPosition().y; // Preserve the original y position of the button
+
+    sf::FloatRect textRect = m_text.getLocalBounds();
+    sf::Vector2f size = m_button.getSize();
+    m_button.setPosition({x, y}); // Set the new centered position of the button
+
+    // Recalculate the position of the text based on the new centered position of the button
+    sf::Vector2f position = m_button.getPosition();
+    m_text.setOrigin(textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f);
+    m_text.setPosition(position.x + size.x / 2.f, position.y + size.y / 2.f);
+}
+

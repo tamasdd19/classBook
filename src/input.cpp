@@ -31,7 +31,7 @@ void TextInput::removeCursor()
 }
 
 void TextInput::addCursor()
-{
+{  
     m_text += '_';
 }
 
@@ -47,47 +47,97 @@ void TextInput::appendCharacter(const char& c)
     m_text += "_";
 }
 
-void TextInput::handleEvent(sf::Event& event, sf::RenderWindow& window)
+std::map<sf::Keyboard::Key, char> keyToCharMapping = {
+    {sf::Keyboard::A, 'A'},
+    {sf::Keyboard::B, 'B'},
+    {sf::Keyboard::C, 'C'},
+    {sf::Keyboard::D, 'D'},
+    {sf::Keyboard::E, 'E'},
+    {sf::Keyboard::F, 'F'},
+    {sf::Keyboard::G, 'G'},
+    {sf::Keyboard::H, 'H'},
+    {sf::Keyboard::I, 'I'},
+    {sf::Keyboard::J, 'J'},
+    {sf::Keyboard::K, 'K'},
+    {sf::Keyboard::L, 'L'},
+    {sf::Keyboard::M, 'M'},
+    {sf::Keyboard::N, 'N'},
+    {sf::Keyboard::O, 'O'},
+    {sf::Keyboard::P, 'P'},
+    {sf::Keyboard::Q, 'Q'},
+    {sf::Keyboard::R, 'R'},
+    {sf::Keyboard::S, 'S'},
+    {sf::Keyboard::T, 'T'},
+    {sf::Keyboard::U, 'U'},
+    {sf::Keyboard::V, 'V'},
+    {sf::Keyboard::W, 'W'},
+    {sf::Keyboard::X, 'X'},
+    {sf::Keyboard::Y, 'Y'},
+    {sf::Keyboard::Z, 'Z'},
+    {sf::Keyboard::Num1, '1'},
+    {sf::Keyboard::Num2, '2'},
+    {sf::Keyboard::Num3, '3'},
+    {sf::Keyboard::Num4, '4'},
+    {sf::Keyboard::Num5, '5'},
+    {sf::Keyboard::Num6, '6'},
+    {sf::Keyboard::Num7, '7'},
+    {sf::Keyboard::Num8, '8'},
+    {sf::Keyboard::Num9, '9'},
+    {sf::Keyboard::Num0, '0'},
+};
+
+// Function to convert sf::Keyboard::Key to char
+char keyToChar(sf::Keyboard::Key key)
+{
+    auto it = keyToCharMapping.find(key);
+    if (it != keyToCharMapping.end())
+    {
+        return it->second;
+    }
+    return '\0'; // Return null character if mapping not found
+}
+
+void TextInput::handleEvent(sf::Event& event, sf::RenderWindow& window, bool& keyPressed)
 {
     // while(window.pollEvent(event))
-    // {
+    // 
         switch(event.type)
         {
             case sf::Event::MouseButtonPressed:
                 if (event.mouseButton.button == sf::Mouse::Left)
                 {
                     if(this->isMouseOver(window) && !this->getSelected())
-                    {   // this works, great! 
+                    {   
                         this->setSelected(true);
-                        // this->addCursor();
                     }
-                    else
+                    else if(this->getSelected() && !this->isMouseOver(window))
                     {
-                        if(this->getSelected())
-                        {
-                            this->setSelected(false);
-                            // this->removeCursor();
-                        }
+                        this->setSelected(false);
                     }
                 }
                 break;
             case sf::Event::TextEntered:
-                if (event.text.unicode < 128 && this->getSelected())
+                if (event.text.unicode < 128 && this->getSelected() && (!keyPressed || (this->getText()[this->getText().size()-2] != static_cast<char>(event.text.unicode) && event.text.unicode != '\b'))) //|| this->getText()[this->getText().size()-2] != static_cast<char>(event.text.unicode)))
                 {
-                    if (event.text.unicode == '\b' && !this->getText().empty()) // Handle backspace
+                    if (event.text.unicode == '\b' && !this->getText().empty())
                     {
                         this->deleteCharacter();
                     }
                     else
                     {
                         this->appendCharacter(static_cast<char>(event.text.unicode));
+                        
                     }
+                    keyPressed = true;
                 }
+                break;
+            case sf::Event::KeyReleased:
+                if(std::toupper(this->getText()[this->getText().size()-2]) == keyToChar(event.key.code))
+                    keyPressed = false;
                 break;
             default:
                 break;
         }
-    // }
 }
 
 void TextInput::update()
@@ -97,9 +147,12 @@ void TextInput::update()
         this->setText(m_text);
         return ;
     }
-    
+    else if(m_text[0] == 13)
+    {
+        m_text.erase(0,1);
+    }
     std::string aux = m_text;
-    int i=1;
+    int i=0;
     while(aux[i]!='_')
     {
         aux[i] = '*';

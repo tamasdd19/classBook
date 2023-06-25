@@ -26,5 +26,5 @@ public:
 private:
     std::vector<Course*> m_courses;
     std::string m_majorName;
-    int m_majorId, m_majorYear, m_facultyId;
+    int m_majorId = -1, m_majorYear = -1, m_facultyId = -1;
 };
