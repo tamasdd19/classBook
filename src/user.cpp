@@ -70,20 +70,16 @@ void User::setSex(bool sexM)
 {
     m_sexM = sexM;
 }
-void User::setDateOfBirth(const char* date)
+
+void User::setDateOfBirth(int day, int month, int year)
 {
-    std::string test = date;
-    int newDate[3], k=0;
-    for(int i=0; i<test.size(); i+=2)
-    {
-        std::string temp(1, test[i]); // Convert the character to a string
-        newDate[k++] = std::stoi(temp);
-        std::cout << std::stoi(temp) << "\n";
-    }
-    if(m_DoB != nullptr)
+    if (m_DoB != nullptr)
         delete m_DoB;
-    m_DoB = new Date(newDate[0], newDate[1], newDate[2]);
+    m_DoB = new Date(day, month, year);
 }
+
+
+
 
 // Date part
 

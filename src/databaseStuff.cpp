@@ -26,8 +26,12 @@ int callbackFunction(void* data, int argc, char** argv, char** columnNames)
                     {
                         mydata->user = new Professor(mydata->name);
                     }
-                    mydata->user->setDateOfBirth(argv[i+6]);
+                    mydata->user->setDateOfBirth(std::stoi(argv[i+6]), std::stoi(argv[i+7]), std::stoi(argv[i+8]));
                     mydata->user->setId(std::stoi(argv[i-1]));
+                    mydata->user->setFirstName(argv[i+4]);
+                    mydata->user->setLastName(argv[i+5]);
+                    mydata->user->setSex(std::stoi(argv[i+9]));
+                    mydata->user->setCountryOrigin(argv[i+10]);
                     std::cout << mydata->user->getUsername() << " has logged in!\n";
                     break;
                 }

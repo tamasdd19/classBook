@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 
 class Date;
@@ -26,7 +27,7 @@ public:
     void setLastName(const std::string&);
     void setCountryOrigin(const std::string&);
     void setSex(bool);
-    void setDateOfBirth(const char*); // I'm gonna read the date of birth from the users table, which is a char** and I'm gonna convert in the function
+    void setDateOfBirth(int, int, int); // I'm gonna read the date of birth from the users table, which is a char** and I'm gonna convert in the function
 private:
     int m_ID = -1;
     std::string m_username, m_firstName, m_lastName, m_countryOrigin;

@@ -6,6 +6,7 @@
 #include "button.h"
 #include "input.h"
 #include "databaseStuff.h"
+#include "table.h"
 
 
 int main()
@@ -89,6 +90,12 @@ int main()
     bool studentPage = false;
     bool professorPage = false;
     bool keyPressed = false;
+    bool menus[3] = {false, false, false}; // main menu, first and second menu in studentPage or professorPage
+
+    std::vector<Button*> menu1Buttons;
+    std::vector<std::vector<std::string>> table;
+    std::vector<std::string> row;
+    Table* tableStruct;
 
     window.setFramerateLimit(60);
     textInput.setSelected(true);
@@ -148,6 +155,7 @@ int main()
                                     Date* test = student->getDateOfBirth();
                                     std::cout << "Day: " << test->getDay() << "\nMonth: " << test->getMonth() << "\nYear: " << test->getYear() << "\n";
                                     studentPage = true;
+                                    menus[0] = true;
                                 }
                                 else
                                 {
@@ -221,64 +229,104 @@ int main()
                 i->draw(window);
             window.display();
         }
-        else if(studentPage) // Mai trebuie sa centrez text-ul de la titlu din student page si professor page, 
-        {               // o sa trebuiasca sa vad cum sa maresc chenarul mare astfel incat sa acopere tot text-ul
-            while(window.pollEvent(event)) // si raman de facut meniurile mai departe, la student si la profesor
-            {
-                auto iter = buttonsToDraw.begin();
-
-                switch(event.type)
+        else if(studentPage)  
+        {
+            if(menus[0])           
+            {    
+                while(window.pollEvent(event)) 
                 {
-                    default:
-                        break;
-                    case sf::Event::Closed:
-                        window.close();
-                        break;
+                    auto iter = buttonsToDraw.begin();
 
-                    case sf::Event::MouseMoved:
-                        ++iter;
+                    switch(event.type)
+                    {
+                        default:
+                            break;
+                        case sf::Event::Closed:
+                            window.close();
+                            break;
 
-                        for (; iter != buttonsToDraw.end(); ++iter)
-                        {
-                            auto& i = *iter;
-                            
-                            if (i->isMouseOver(window)) 
+                        case sf::Event::MouseMoved:
+                            ++iter;
+
+                            for (; iter != buttonsToDraw.end(); ++iter)
                             {
-                                i->setOutlineThickness(3.f);
-                                i->setOutlineColor(sf::Color::Black);
-                                i->setFillColor(sf::Color(255, 255, 255, 250));
-                            }
-                            else
-                            {
-                                i->setOutlineThickness(0);
-                                i->setFillColor(sf::Color(255, 255, 255, 200));
-                            }
-                        }
-                        break;
-                    case sf::Event::MouseButtonPressed:
-                        if (event.mouseButton.button == sf::Mouse::Left)
-                        {
-                            if(buttonsToDraw[1]->isMouseOver(window)) // Student's data
-                            {
+                                auto& i = *iter;
                                 
+                                if (i->isMouseOver(window)) 
+                                {
+                                    i->setOutlineThickness(3.f);
+                                    i->setOutlineColor(sf::Color::Black);
+                                    i->setFillColor(sf::Color(255, 255, 255, 250));
+                                }
+                                else
+                                {
+                                    i->setOutlineThickness(0);
+                                    i->setFillColor(sf::Color(255, 255, 255, 200));
+                                }
                             }
-                            if(buttonsToDraw[2]->isMouseOver(window)) // Courses
+                            break;
+                        case sf::Event::MouseButtonPressed:
+                            if (event.mouseButton.button == sf::Mouse::Left)
                             {
-
+                                if(buttonsToDraw[1]->isMouseOver(window)) // Student's data
+                                {
+                                    menus[1] = true;
+                                    menus[0] = false;
+                                    
+                                    menu1Buttons.push_back(buttonsToDraw[0]);
+                                    row = {"Test", "Test2", "TestLol"};
+                                    table.push_back(row);
+                                    row.clear();
+                                    row = {"Lol", "wtf", "LMAO"};
+                                    table.push_back(row);
+                                    tableStruct = new Table({150.f, 20.f}, 50.f, table, font, 24);
+                                    break;
+                                }
+                                if(buttonsToDraw[2]->isMouseOver(window)) // Courses
+                                {
+                                    menus[2] = true;
+                                    menus[0] = false;
+                                }
+                                if(buttonsToDraw[3]->isMouseOver(window)) // Exit
+                                {
+                                    window.close();
+                                }
                             }
-                            if(buttonsToDraw[3]->isMouseOver(window)) // Exit
-                            {
-                                window.close();
-                            }
-                        }
-                        break;
+                            break;
+                    }
                 }
+                window.clear();
+                window.draw(backgroundStudent);
+                for(auto& i : buttonsToDraw)
+                    i->draw(window);
+                window.display();
             }
-            window.clear();
-            window.draw(backgroundStudent);
-            for(auto& i : buttonsToDraw)
-                i->draw(window);
-            window.display();
+            else if(menus[1])
+            {
+                while(window.pollEvent(event)) 
+                {
+                    auto iter = buttonsToDraw.begin();
+
+                    switch(event.type)
+                    {
+                        default:
+                            break;
+                        case sf::Event::Closed:
+                            window.close();
+                            break;
+                    }
+                }
+                window.clear();
+                window.draw(backgroundStudent);
+                for(auto& i : menu1Buttons)
+                    i->draw(window);
+                tableStruct->draw(window); // Will add an sprite behind the table to make it look nicer
+                window.display();
+            }
+            else if(menus[2])
+            {
+
+            }
         }
         else if(professorPage)
         {
