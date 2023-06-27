@@ -357,7 +357,18 @@ int main()
             }
             else if(menus[2])
             {
-
+                while(window.pollEvent(event))
+                {
+                    switch(event.type)
+                    {
+                        case sf::Event::Closed:
+                            window.close();
+                            break;
+                    }
+                }
+                window.clear();
+                window.draw(backgroundStudent);
+                window.display();
             }
         }
         else if(professorPage)
@@ -419,8 +430,8 @@ int main()
                                 }
                                 else if (buttonsToDraw[2]->isMouseOver(window))  // GradeBook, to give grades and stuff
                                 { 
-                                    // Add your code here
-                                    // ...
+                                    menus[2] = true;
+                                    menus[0] = false;
                                     break;
                                 }
                                 else if (buttonsToDraw[3]->isMouseOver(window))  // Exit
@@ -437,7 +448,7 @@ int main()
                 for (auto& i : buttonsToDraw)
                     i->draw(window);
                 window.display();
-            } // Prea multe erori si ma doare prea tare capu, fac acasa
+            } 
             else if (menus[1]) 
             {
                 while(window.pollEvent(event)) 
@@ -532,10 +543,10 @@ Table* createTable(sf::RenderWindow& window, User* user, sf::Font& font)
     row = {"Country of origin: ", user->getCountryOrigin()};
     table.push_back(row);
     row.clear();
-    row = {"Sex: ", (user->isMale() ? "Male" : "Female")};
+    row = {"Gender: ", (user->isMale() ? "Male" : "Female")};
     table.push_back(row);
     tableStruct = new Table(tablePosition, 75.f, table, font, 26);    
-    tableSize = tableStruct->getSize();
+    tableSize = tableStruct->maxCellSize();
     tablePosition.x = static_cast<float>(windowPosition.x) / 2.0f + static_cast<float>(tableSize.x) / 1.25f;
     tablePosition.y = static_cast<float>(windowPosition.y) / 2.0f + static_cast<float>(tableSize.y) / 2.5f;
     delete tableStruct;

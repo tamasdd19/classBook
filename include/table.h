@@ -8,6 +8,7 @@ public:
     Table(sf::Vector2f position, float rowHeight, std::vector<std::vector<std::string>> data, sf::Font& font, unsigned int fontSize);
 
     void draw(sf::RenderWindow& window);
+    sf::Vector2f maxCellSize();
     sf::Vector2f getSize() const;
 
     void setCenter(const sf::Vector2u& windowSize);
@@ -20,5 +21,5 @@ private:
     unsigned int m_numRows;
     unsigned int m_numColumns;
     std::vector<sf::Text> m_cells;
-    float m_cellWidth = 205.f; // Adjust the width of each cell as needed
+    float m_cellWidth = 700.f;
 };
