@@ -34,9 +34,9 @@ std::string User::getCountryOrigin() const
 {
     return m_countryOrigin;
 }
-bool User::getSex() const
+bool User::isMale() const
 {
-    return m_sexM;
+    return m_male;
 }
 Date* User::getDateOfBirth() const
 {
@@ -66,9 +66,9 @@ void User::setCountryOrigin(const std::string& country)
 {
     m_countryOrigin = country;
 }
-void User::setSex(bool sexM)
+void User::setMale(bool sexM)
 {
-    m_sexM = sexM;
+    m_male = sexM;
 }
 
 void User::setDateOfBirth(int day, int month, int year)
@@ -108,6 +108,11 @@ int Date::getMonth() const
 int Date::getYear() const
 {
     return m_year;
+}
+
+std::string Date::getString() const
+{
+    return std::to_string(m_day) + '/' + std::to_string(m_month) + '/' +  std::to_string(m_year);
 }
 
 // Setters

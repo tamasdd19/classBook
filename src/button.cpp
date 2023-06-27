@@ -133,6 +133,16 @@ void Button::setOutlineThickness(float thickness)
     m_button.setOutlineThickness(thickness);
 }
 
+void Button::setPosition(const sf::Vector2f& position)
+{
+    m_button.setPosition(position);
+    sf::FloatRect textRect = m_text.getLocalBounds();
+    sf::Vector2f buttonSize = m_button.getSize();
+    m_text.setOrigin(textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f);
+    m_text.setPosition(position.x + buttonSize.x / 2.f, position.y + buttonSize.y / 2.f);
+}
+
+
 void Button::function()
 {
 
