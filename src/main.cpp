@@ -132,7 +132,7 @@ int main()
                                 textInput.clearText();
                                 passInput.clearText();
 
-                                userData.name = "Student1";//user;
+                                userData.name = "Prof1";//user;
                                 userData.password = "test";//pass;
 
                                 const char* selectQuery = "SELECT * FROM users;";
@@ -285,11 +285,6 @@ int main()
 
                                         Button::resetButtonHeight();
 
-                                        // btn = new Button(&Button::setCenter, window.getSize(), {300.f, 500.f}, "", font, 28);
-                                        // menu1Buttons.push_back(btn);
-                                        // menu1Buttons.pop_back();
-                                        // delete btn;
-
                                         menu1Options(menu1Buttons, window, student, font);
 
                                     }
@@ -330,7 +325,7 @@ int main()
                         case sf::Event::MouseMoved:
                             ++iter;
 
-                            for (; iter != menu1Buttons.end(); ++iter)
+                            for (int j=0; j<1; j++)
                             {
                                 auto& i = *iter;
                                 
@@ -362,7 +357,6 @@ int main()
                 window.draw(backgroundStudent);
                 for(auto& i : menu1Buttons)
                     i->draw(window);
-                // tableStruct->draw(window); // Will add an sprite behind the table to make it look nicer
                 window.display();
             }
             else if(menus[2])
@@ -426,7 +420,6 @@ int main()
                                     {
                                         sf::Vector2f btnPosition;
                                         menu1Buttons.push_back(buttonsToDraw[0]);
-                                        // tableStruct = createTable(window, professor, font);
                                         
                                         btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Back", font, 28);
                                         btn->setFillColor(sf::Color(255, 255, 255, 200));
@@ -435,6 +428,8 @@ int main()
                                         btnPosition.y -= 50.f;
                                         btn->setPosition(btnPosition);
                                         menu1Buttons.push_back(btn);
+
+                                        Button::resetButtonHeight();
 
                                         menu1Options(menu1Buttons, window, professor, font);
                                     }
@@ -477,7 +472,7 @@ int main()
                         case sf::Event::MouseMoved:
                             ++iter;
 
-                            for (; iter != menu1Buttons.end(); ++iter)
+                            for (int j = 0; j<1; j++)
                             {
                                 auto& i = *iter;
                                 
@@ -509,7 +504,6 @@ int main()
                 window.draw(backgroundProfessor);
                 for(auto& i : menu1Buttons)
                     i->draw(window);
-                tableStruct->draw(window); // Will add an sprite behind the table to make it look nicer
                 window.display();
             }
             else if(menus[2]) // rest of the code for the gradeBook goes here!
@@ -553,13 +547,14 @@ void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, 
     {
         btn->setPosition(btnPosition);
     }
+    btn->setOutlineThickness(0);
+    btn->setFillColor(sf::Color(255, 255, 255, 200));
     menu1Buttons.push_back(btn);
 
     btnText = "Last Name: " + user->getLastName();
     btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
     btnPosition = btn->getPosition();
     btnPosition.y += 200.f;
-    btn->setTextColor(sf::Color(0, 0, 0, 255));
     if (btn->isTextOutOfBounds()) 
     {
         delete btn;
@@ -570,6 +565,8 @@ void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, 
     {
         btn->setPosition(btnPosition);
     }
+    btn->setOutlineThickness(0);
+    btn->setFillColor(sf::Color(255, 255, 255, 200));
     menu1Buttons.push_back(btn);
 
     // dob, country of origin, gender
@@ -578,14 +575,14 @@ void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, 
     btnPosition = btn->getPosition();
     btnPosition.y += 200.f;
     btn->setPosition(btnPosition);
-    btn->setTextColor(sf::Color(0, 0, 0, 255));
+    btn->setOutlineThickness(0);
+    btn->setFillColor(sf::Color(255, 255, 255, 200));
     menu1Buttons.push_back(btn);
 
     btnText = "Country of Origin: " + user->getCountryOrigin();
     btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
     btnPosition = btn->getPosition();
     btnPosition.y += 200.f;
-    btn->setTextColor(sf::Color(0, 0, 0, 255));
     if (btn->isTextOutOfBounds()) 
     {
         delete btn;
@@ -596,6 +593,8 @@ void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, 
     {
         btn->setPosition(btnPosition);
     }
+    btn->setOutlineThickness(0);
+    btn->setFillColor(sf::Color(255, 255, 255, 200));
     menu1Buttons.push_back(btn);
 
     btnText = "Gender: ";
@@ -606,8 +605,9 @@ void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, 
     btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
     btnPosition = btn->getPosition();
     btnPosition.y += 200.f;
-    btn->setTextColor(sf::Color(0, 0, 0, 255));
     btn->setPosition(btnPosition);
+    btn->setOutlineThickness(0);
+    btn->setFillColor(sf::Color(255, 255, 255, 200));
     menu1Buttons.push_back(btn);
 }
 
