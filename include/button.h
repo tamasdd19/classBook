@@ -10,7 +10,7 @@ public:
     Button();
     Button(sf::Vector2f position, sf::Vector2f size, std::string text, sf::Font& font, int textSize=CHAR_SIZE);
     Button(sf::Vector2f (*function)(const sf::Vector2u&, const sf::Vector2f&), const sf::Vector2u& windowSize, const sf::Vector2f& size, std::string text, sf::Font& font, int textSize=CHAR_SIZE);
-    Button(sf::Vector2f position, std::string text, sf::Font& font, int textSize);    // If you want to use the setRight, setCenter and setLeft functions, the height will be automaticaly determined by the class itself
+    Button(sf::Vector2f position, std::string text, sf::Font& font, int textSize, const sf::Vector2f& boxThickness, bool addTotalHeight);    // If you want to use the setRight, setCenter and setLeft functions, the height will be automaticaly determined by the class itself
     // In order for you to not overwrite them and to not have to do anything with the height itself. You can change how much space you want in between
     // options by changing the SPACE_BETWEEN_LINES macro up. 25px is set by default
 
@@ -34,6 +34,7 @@ public:
     static sf::Vector2f setRight(const sf::Vector2u&, const sf::Vector2f&);
     static void resetButtonHeight();
     sf::Vector2f getPosition() const;
+    bool isTextOutOfBounds();
 private:
     sf::RectangleShape m_button;
     sf::Text m_text;

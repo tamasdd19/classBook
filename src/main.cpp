@@ -8,7 +8,8 @@
 #include "databaseStuff.h"
 #include "table.h"
 
-Table* createTable(sf::RenderWindow& window, User* user, sf::Font& font);
+void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, User* user, sf::Font& font);
+
 
 int main()
 {
@@ -131,8 +132,8 @@ int main()
                                 textInput.clearText();
                                 passInput.clearText();
 
-                                userData.name = user;
-                                userData.password = pass;
+                                userData.name = "Student1";//user;
+                                userData.password = "test";//pass;
 
                                 const char* selectQuery = "SELECT * FROM users;";
                                 rc = sqlite3_exec(db, selectQuery, callbackFunction, &userData, 0);
@@ -157,12 +158,12 @@ int main()
                                     professorPage = true;
                                 }
                                 std::string titleText = "Welcome, ";
-                                titleText += user;
+                                titleText += userData.user->getFirstName() + " " + userData.user->getLastName();
                                 loginPage = false;      
                                 sf::Vector2f position = title->getPosition();                          
                                 delete title;
                                 Button::resetButtonHeight();
-                                title = new Button(position, titleText, font, 50);
+                                title = new Button(position, titleText, font, 50, {60.f, 60.f}, true);
                                 title->setFillColor(sf::Color(0, 0, 0, 80));
                                 title->setOutlineThickness(0);
                                 title->setTextColor(sf::Color(255, 255, 255));
@@ -268,13 +269,12 @@ int main()
                                     menus[1] = true;
                                     menus[0] = false;
                                     
-                                    if(tableStruct == nullptr)
+                                    if(menu1Buttons.empty())
                                     {
                                         sf::Vector2f btnPosition;
+                                        std::string btnText;
                                         menu1Buttons.push_back(buttonsToDraw[0]);
 
-                                        tableStruct = createTable(window, student, font);
-                                    
                                         btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Back", font, 28);
                                         btn->setFillColor(sf::Color(255, 255, 255, 200));
                                         btn->setOutlineThickness(0);
@@ -282,6 +282,16 @@ int main()
                                         btnPosition.y -= 50.f;
                                         btn->setPosition(btnPosition);
                                         menu1Buttons.push_back(btn);
+
+                                        Button::resetButtonHeight();
+
+                                        // btn = new Button(&Button::setCenter, window.getSize(), {300.f, 500.f}, "", font, 28);
+                                        // menu1Buttons.push_back(btn);
+                                        // menu1Buttons.pop_back();
+                                        // delete btn;
+
+                                        menu1Options(menu1Buttons, window, student, font);
+
                                     }
                                     break;
                                 }
@@ -352,7 +362,7 @@ int main()
                 window.draw(backgroundStudent);
                 for(auto& i : menu1Buttons)
                     i->draw(window);
-                tableStruct->draw(window); // Will add an sprite behind the table to make it look nicer
+                // tableStruct->draw(window); // Will add an sprite behind the table to make it look nicer
                 window.display();
             }
             else if(menus[2])
@@ -412,11 +422,11 @@ int main()
                                     menus[1] = true;
                                     menus[0] = false;
                                         
-                                    if (tableStruct == nullptr) 
+                                    if (menu1Buttons.empty()) 
                                     {
                                         sf::Vector2f btnPosition;
                                         menu1Buttons.push_back(buttonsToDraw[0]);
-                                        tableStruct = createTable(window, professor, font);
+                                        // tableStruct = createTable(window, professor, font);
                                         
                                         btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Back", font, 28);
                                         btn->setFillColor(sf::Color(255, 255, 255, 200));
@@ -425,6 +435,8 @@ int main()
                                         btnPosition.y -= 50.f;
                                         btn->setPosition(btnPosition);
                                         menu1Buttons.push_back(btn);
+
+                                        menu1Options(menu1Buttons, window, professor, font);
                                     }
                                     break;
                                 }
@@ -521,37 +533,82 @@ int main()
     return 0;
 }
 
-Table* createTable(sf::RenderWindow& window, User* user, sf::Font& font)
+void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, User* user, sf::Font& font)
 {
-    Table* tableStruct;
-    std::vector<std::string> row;
-    std::vector<std::vector<std::string>> table;
-    sf::Vector2i windowPosition = window.getPosition();
-    sf::Vector2u windowSize = window.getSize();
-    sf::Vector2f tableSize;
-    sf::Vector2f tablePosition = {0.f, 0.f};
-    sf::Vector2f btnPositon;
-    row = {"First Name: ", user->getFirstName()};
-    table.push_back(row);
-    row.clear();
-    row = {"Last Name: ", user->getLastName()};
-    table.push_back(row);
-    row.clear();
-    row = {"Date of birth: ", user->getDateOfBirth()->getString()};
-    table.push_back(row);
-    row.clear();
-    row = {"Country of origin: ", user->getCountryOrigin()};
-    table.push_back(row);
-    row.clear();
-    row = {"Gender: ", (user->isMale() ? "Male" : "Female")};
-    table.push_back(row);
-    tableStruct = new Table(tablePosition, 75.f, table, font, 26);    
-    tableSize = tableStruct->maxCellSize();
-    tablePosition.x = static_cast<float>(windowPosition.x) / 2.0f + static_cast<float>(tableSize.x) / 1.25f;
-    tablePosition.y = static_cast<float>(windowPosition.y) / 2.0f + static_cast<float>(tableSize.y) / 2.5f;
-    delete tableStruct;
-    tableStruct = new Table(tablePosition, 75.f, table, font, 26);
-    return tableStruct;
+    std::string btnText;
+    Button* btn;
+    sf::Vector2f btnPosition;
+    btnText = "First Name: " + user->getFirstName();
+    btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
+    btnPosition = btn->getPosition();
+    btnPosition.y += 200.f;
+    btn->setTextColor(sf::Color(0, 0, 0, 255));
+    if (btn->isTextOutOfBounds()) 
+    {
+        delete btn;
+        btn = new Button(btnPosition, btnText, font, 28, {30.f, 30.f}, false);
+        btn->setPositionCenter(window.getSize());
+    } 
+    else 
+    {
+        btn->setPosition(btnPosition);
+    }
+    menu1Buttons.push_back(btn);
+
+    btnText = "Last Name: " + user->getLastName();
+    btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
+    btnPosition = btn->getPosition();
+    btnPosition.y += 200.f;
+    btn->setTextColor(sf::Color(0, 0, 0, 255));
+    if (btn->isTextOutOfBounds()) 
+    {
+        delete btn;
+        btn = new Button(btnPosition, btnText, font, 28, {30.f, 30.f}, false);
+        btn->setPositionCenter(window.getSize());
+    } 
+    else
+    {
+        btn->setPosition(btnPosition);
+    }
+    menu1Buttons.push_back(btn);
+
+    // dob, country of origin, gender
+    btnText = "Date of Birth: " + user->getDateOfBirth()->getString();
+    btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
+    btnPosition = btn->getPosition();
+    btnPosition.y += 200.f;
+    btn->setPosition(btnPosition);
+    btn->setTextColor(sf::Color(0, 0, 0, 255));
+    menu1Buttons.push_back(btn);
+
+    btnText = "Country of Origin: " + user->getCountryOrigin();
+    btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
+    btnPosition = btn->getPosition();
+    btnPosition.y += 200.f;
+    btn->setTextColor(sf::Color(0, 0, 0, 255));
+    if (btn->isTextOutOfBounds()) 
+    {
+        delete btn;
+        btn = new Button(btnPosition, btnText, font, 28, {30.f, 30.f}, false);
+        btn->setPositionCenter(window.getSize());
+    } 
+    else 
+    {
+        btn->setPosition(btnPosition);
+    }
+    menu1Buttons.push_back(btn);
+
+    btnText = "Gender: ";
+    if (user->isMale())
+        btnText += "Male";
+    else
+        btnText += "Female";
+    btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
+    btnPosition = btn->getPosition();
+    btnPosition.y += 200.f;
+    btn->setTextColor(sf::Color(0, 0, 0, 255));
+    btn->setPosition(btnPosition);
+    menu1Buttons.push_back(btn);
 }
 
 

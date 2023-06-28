@@ -31,6 +31,5 @@ private:
     bool m_password = false;
     // bool m_showCursor;
     // sf::Clock m_cursorTimer; IDEEA FOR THE FUTURE
-
     // static const sf::Time CURSOR_BLINK_TIME;
 };

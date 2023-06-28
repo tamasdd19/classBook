@@ -38,7 +38,7 @@ Button::Button(sf::Vector2f (*function)(const sf::Vector2u&, const sf::Vector2f&
     new (this) Button(position, size, text, font, textSize);
 }
 
-Button::Button(sf::Vector2f position, std::string text, sf::Font& font, int textSize)
+Button::Button(sf::Vector2f position, std::string text, sf::Font& font, int textSize, const sf::Vector2f& boxThickness, bool addTotalHeight)
 {
     m_text.setFont(font);
     m_text.setString(text);
@@ -47,7 +47,7 @@ Button::Button(sf::Vector2f position, std::string text, sf::Font& font, int text
 
     // Calculate the size of the button based on the size of the text
     sf::FloatRect textRect = m_text.getLocalBounds();
-    sf::Vector2f buttonSize(textRect.width + 60.f, textRect.height + 60.f);
+    sf::Vector2f buttonSize(textRect.width + boxThickness.x, textRect.height + boxThickness.y);
 
     m_button.setSize(buttonSize);
     m_button.setPosition(position);
@@ -59,7 +59,8 @@ Button::Button(sf::Vector2f position, std::string text, sf::Font& font, int text
     m_text.setOrigin(textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f);
     m_text.setPosition(position.x + buttonSize.x / 2.f, position.y + buttonSize.y / 2.f);
 
-    Button::m_buttonsTotalHeight += buttonSize.y + SPACE_BETWEEN_LINES;
+    if(addTotalHeight)
+        Button::m_buttonsTotalHeight += buttonSize.y + SPACE_BETWEEN_LINES;
 }
 
 sf::Vector2f Button::setCenter(const sf::Vector2u& windowSize, const sf::Vector2f& size)
@@ -188,3 +189,18 @@ void Button::setPositionCenter(const sf::Vector2u& windowSize)
     m_text.setPosition(position.x + size.x / 2.f, position.y + size.y / 2.f);
 }
 
+bool Button::isTextOutOfBounds()
+{
+    sf::FloatRect buttonBounds = m_button.getGlobalBounds();
+    sf::FloatRect textBounds = m_text.getGlobalBounds();
+
+    if (textBounds.left < buttonBounds.left ||
+        textBounds.top < buttonBounds.top ||
+        textBounds.left + textBounds.width > buttonBounds.left + buttonBounds.width ||
+        textBounds.top + textBounds.height > buttonBounds.top + buttonBounds.height)
+    {
+        return true; 
+    }
+
+    return false;
+}
