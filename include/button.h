@@ -28,6 +28,7 @@ public:
     void setSize(const sf::Vector2f& size);
     void setPositionCenter(const sf::Vector2u& windowSize);
     void setPosition(const sf::Vector2f&);
+    void replaceText(const std::string& toReplace, const std::string& replace);
     void function();
     static sf::Vector2f setCenter(const sf::Vector2u&, const sf::Vector2f&);
     static sf::Vector2f setLeft(const sf::Vector2u&, const sf::Vector2f&);

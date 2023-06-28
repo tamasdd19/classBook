@@ -143,6 +143,12 @@ void Button::setPosition(const sf::Vector2f& position)
     m_text.setPosition(position.x + buttonSize.x / 2.f, position.y + buttonSize.y / 2.f);
 }
 
+void Button::replaceText(const std::string& toReplace, const std::string& replace)
+{
+    std::string replacement = m_text.getString();
+    replacement.replace(replacement.find(toReplace), toReplace.size(), replace);
+    m_text.setString(replacement);
+}
 
 void Button::function()
 {

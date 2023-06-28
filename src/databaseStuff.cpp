@@ -51,7 +51,6 @@ int getMajor(void* data, int argc, char** argv, char** columnNames)
     Major* major = static_cast<Major*>(data);
     major->setId(std::stoi(argv[0]));
     major->setName(argv[1]);
-    std::cout << major->getName();
     major->setYear(std::stoi(argv[2]));
     major->setFacultyId(std::stoi(argv[3]));
     return 0;
@@ -63,5 +62,12 @@ int setMajorCourses(void* data, int argc, char** argv, char** columnNames)
     Course* course;
     course = new Course(std::stoi(argv[0]), argv[1], data2->id);
     data2->courses.push_back(course);
+    return 0;
+}
+
+int getGrades(void* data, int argc, char** argv, char** columnNames) 
+{
+    float* grade = static_cast<float*>(data);
+    *grade = std::stof(argv[2]);
     return 0;
 }

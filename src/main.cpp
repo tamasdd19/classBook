@@ -8,8 +8,11 @@
 #include "databaseStuff.h"
 #include "table.h"
 
-void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, User* user, sf::Font& font);
+#define NAME_DEBUG "Student1"
+#define PASSWORD_DEBUG "test"
 
+void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, User* user, sf::Font& font);
+void menu2Student(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Student* student, sf::Font& font, sqlite3* db);
 
 int main()
 {
@@ -91,9 +94,9 @@ int main()
     bool menus[3] = {false, false, false}; // main menu, first and second menu in studentPage or professorPage
 
     std::vector<Button*> menu1Buttons;
-    std::vector<std::vector<std::string>> table;
-    Table* tableStruct = nullptr;
+    std::vector<Button*> menu2Buttons;
     Button* btn = nullptr;
+    Button* backBtn = nullptr;
 
     window.setFramerateLimit(60);
     textInput.setSelected(true);
@@ -132,8 +135,8 @@ int main()
                                 textInput.clearText();
                                 passInput.clearText();
 
-                                userData.name = "Prof1";//user;
-                                userData.password = "test";//pass;
+                                userData.name = NAME_DEBUG;//user;
+                                userData.password = PASSWORD_DEBUG;//pass;
 
                                 const char* selectQuery = "SELECT * FROM users;";
                                 rc = sqlite3_exec(db, selectQuery, callbackFunction, &userData, 0);
@@ -264,6 +267,16 @@ int main()
                         case sf::Event::MouseButtonPressed:
                             if (event.mouseButton.button == sf::Mouse::Left)
                             {
+                                if(backBtn == nullptr)
+                                {
+                                    sf::Vector2f btnPosition;
+                                    backBtn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Back", font, 28);
+                                    backBtn->setFillColor(sf::Color(255, 255, 255, 200));
+                                    backBtn->setOutlineThickness(0);
+                                    btnPosition = backBtn->getPosition();
+                                    btnPosition.y -= 50.f;
+                                    backBtn->setPosition(btnPosition);
+                                }
                                 if(buttonsToDraw[1]->isMouseOver(window)) // Student's data
                                 {
                                     menus[1] = true;
@@ -271,17 +284,9 @@ int main()
                                     
                                     if(menu1Buttons.empty())
                                     {
-                                        sf::Vector2f btnPosition;
-                                        std::string btnText;
                                         menu1Buttons.push_back(buttonsToDraw[0]);
 
-                                        btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Back", font, 28);
-                                        btn->setFillColor(sf::Color(255, 255, 255, 200));
-                                        btn->setOutlineThickness(0);
-                                        btnPosition = btn->getPosition();
-                                        btnPosition.y -= 50.f;
-                                        btn->setPosition(btnPosition);
-                                        menu1Buttons.push_back(btn);
+                                        menu1Buttons.push_back(backBtn);
 
                                         Button::resetButtonHeight();
 
@@ -290,10 +295,19 @@ int main()
                                     }
                                     break;
                                 }
-                                if(buttonsToDraw[2]->isMouseOver(window)) // Courses
+                                else if(buttonsToDraw[2]->isMouseOver(window)) // Courses
                                 {
                                     menus[2] = true;
                                     menus[0] = false;
+
+                                    if(menu2Buttons.empty())
+                                    {
+                                        menu2Buttons.push_back(backBtn);
+
+                                        Button::resetButtonHeight();
+
+                                        menu2Student(menu2Buttons, window, student, font, db);
+                                    }
                                 }
                                 if(buttonsToDraw[3]->isMouseOver(window)) // Exit
                                 {
@@ -313,8 +327,6 @@ int main()
             {
                 while(window.pollEvent(event)) 
                 {
-                    auto iter = menu1Buttons.begin();
-
                     switch(event.type)
                     {
                         default:
@@ -323,23 +335,16 @@ int main()
                             window.close();
                             break;
                         case sf::Event::MouseMoved:
-                            ++iter;
-
-                            for (int j=0; j<1; j++)
+                            if (menu1Buttons[1]->isMouseOver(window)) 
                             {
-                                auto& i = *iter;
-                                
-                                if (i->isMouseOver(window)) 
-                                {
-                                    i->setOutlineThickness(3.f);
-                                    i->setOutlineColor(sf::Color::Black);
-                                    i->setFillColor(sf::Color(255, 255, 255, 250));
-                                }
-                                else
-                                {
-                                    i->setOutlineThickness(0);
-                                    i->setFillColor(sf::Color(255, 255, 255, 200));
-                                }
+                                menu1Buttons[1]->setOutlineThickness(3.f);
+                                menu1Buttons[1]->setOutlineColor(sf::Color::Black);
+                                menu1Buttons[1]->setFillColor(sf::Color(255, 255, 255, 250));
+                            }
+                            else
+                            {
+                                menu1Buttons[1]->setOutlineThickness(0);
+                                menu1Buttons[1]->setFillColor(sf::Color(255, 255, 255, 200));
                             }
                             break;
                         case sf::Event::MouseButtonPressed:
@@ -365,13 +370,39 @@ int main()
                 {
                     switch(event.type)
                     {
+                        default:
+                            break;
                         case sf::Event::Closed:
                             window.close();
                             break;
+                            case sf::Event::MouseMoved:
+                            if (menu2Buttons[0]->isMouseOver(window)) 
+                            {
+                                menu2Buttons[0]->setOutlineThickness(3.f);
+                                menu2Buttons[0]->setOutlineColor(sf::Color::Black);
+                                menu2Buttons[0]->setFillColor(sf::Color(255, 255, 255, 250));
+                            }
+                            else
+                            {
+                                menu2Buttons[0]->setOutlineThickness(0);
+                                menu2Buttons[0]->setFillColor(sf::Color(255, 255, 255, 200));
+                            }
+                            break;
+                            case sf::Event::MouseButtonPressed:
+                            if(event.mouseButton.button == sf::Mouse::Left)
+                            {
+                                if(menu2Buttons[0]->isMouseOver(window))
+                                {
+                                    menus[2] = false;
+                                    menus[0] = true;
+                                }
+                            }
                     }
                 }
                 window.clear();
                 window.draw(backgroundStudent);
+                for(auto& i : menu2Buttons)
+                    i->draw(window);
                 window.display();
             }
         }
@@ -383,15 +414,17 @@ int main()
                 {
                     auto iter = buttonsToDraw.begin();
 
-                    switch (event.type) 
+                    switch(event.type)
                     {
+                        default:
+                            break;
                         case sf::Event::Closed:
                             window.close();
                             break;
                         case sf::Event::MouseMoved:
                             ++iter;
 
-                            for (; iter != buttonsToDraw.end(); ++iter) 
+                            for (; iter != buttonsToDraw.end(); ++iter)
                             {
                                 auto& i = *iter;
                                 
@@ -401,7 +434,7 @@ int main()
                                     i->setOutlineColor(sf::Color::Black);
                                     i->setFillColor(sf::Color(255, 255, 255, 250));
                                 }
-                                else 
+                                else
                                 {
                                     i->setOutlineThickness(0);
                                     i->setFillColor(sf::Color(255, 255, 255, 200));
@@ -460,8 +493,6 @@ int main()
             {
                 while(window.pollEvent(event)) 
                 {
-                    auto iter = menu1Buttons.begin();
-
                     switch(event.type)
                     {
                         default:
@@ -470,23 +501,16 @@ int main()
                             window.close();
                             break;
                         case sf::Event::MouseMoved:
-                            ++iter;
-
-                            for (int j = 0; j<1; j++)
+                            if (menu1Buttons[1]->isMouseOver(window)) 
                             {
-                                auto& i = *iter;
-                                
-                                if (i->isMouseOver(window)) 
-                                {
-                                    i->setOutlineThickness(3.f);
-                                    i->setOutlineColor(sf::Color::Black);
-                                    i->setFillColor(sf::Color(255, 255, 255, 250));
-                                }
-                                else
-                                {
-                                    i->setOutlineThickness(0);
-                                    i->setFillColor(sf::Color(255, 255, 255, 200));
-                                }
+                                menu1Buttons[1]->setOutlineThickness(3.f);
+                                menu1Buttons[1]->setOutlineColor(sf::Color::Black);
+                                menu1Buttons[1]->setFillColor(sf::Color(255, 255, 255, 250));
+                            }
+                            else
+                            {
+                                menu1Buttons[1]->setOutlineThickness(0);
+                                menu1Buttons[1]->setFillColor(sf::Color(255, 255, 255, 200));
                             }
                             break;
                         case sf::Event::MouseButtonPressed:
@@ -519,6 +543,8 @@ int main()
                             break;
                     }
                 }
+                window.clear();
+                window.display();
             }
         }
         
@@ -610,6 +636,93 @@ void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, 
     btn->setFillColor(sf::Color(255, 255, 255, 200));
     menu1Buttons.push_back(btn);
 }
+
+void menu2Student(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Student* student, sf::Font& font, sqlite3* db)
+{
+    // Initializez the major with all the respective courses for the student
+    Major* major = new Major;
+    Button* btn;
+    int rc;
+    std::string selectQuery;
+    sf::Vector2f btnPosition;
+    std::vector<float> grades;
+    selectQuery = "SELECT * FROM major WHERE id = ";
+    selectQuery += std::to_string(student->getMajorId());
+    selectQuery += ";";
+    
+    rc = sqlite3_exec(db, selectQuery.c_str(), getMajor, major, 0); // GetMajor gets de id and name of the major
+    
+    if(rc != SQLITE_OK)
+    {
+        std::cout << "Error trying to get the major for the student" << std::endl;
+        return ;
+    }
+
+    selectQuery.replace(14, 5, "courses");
+    selectQuery.replace(selectQuery.find("id"), 2, "majorId");
+    MyData2 data2;
+    data2.id = major->getId();
+    rc = sqlite3_exec(db, selectQuery.c_str(), setMajorCourses, &data2, 0); // setMajorCourses sets the major courses up
+    if(rc != SQLITE_OK)
+    {
+        std::cout << "Erorr trying to collect the courses for the student" << std::endl;
+        return ;
+    }
+    major->setCourses(data2.courses);
+    student->setMajor(major);
+
+    std::cout << std::endl;
+
+    for(auto& i : student->getMajor()->getCourses())
+    {
+        std::cout << i->getName() << "\n";
+    }
+
+    // Once the major courses are set up we can begin building up the menu for the student page nr 2
+    std::string btnText = student->getFirstName() + " " + student->getLastName() + ", grades"; 
+    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, btnText, font, 50);
+    sf::Vector2f position = btn->getPosition();                          
+    delete btn;
+    Button::resetButtonHeight();
+    btn = new Button(position, btnText, font, 50, {60.f, 60.f}, true);
+    btn->setFillColor(sf::Color(0, 0, 0, 80));
+    btn->setOutlineThickness(0);
+    btn->setTextColor(sf::Color(255, 255, 255));
+    btn->setPositionCenter(window.getSize());
+    
+    menu2Buttons.push_back(btn);
+
+    for(auto& i : student->getMajor()->getCourses())
+    {
+        float grade;
+        std::string showGrade;
+        selectQuery = "SELECT * FROM grades WHERE courseId = " + std::to_string(i->getId()) + " AND studentID = " + std::to_string(student->getID()) + ";";
+        rc = sqlite3_exec(db, selectQuery.c_str(), getGrades, &grade, 0);
+        if(rc != SQLITE_OK)
+        {
+            std::cout << "Error trying to get grades\n";
+            return ;
+        }
+        showGrade = std::to_string(grade);
+        if(grade == 10.000f)
+        {
+            showGrade = showGrade.substr(0, 2);
+        }
+        else
+        {
+            showGrade = showGrade.substr(0, 4);
+        }
+        btnText = i->getName() + ": " + showGrade;
+        btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, btnText, font, 28);
+        btnPosition = btn->getPosition();
+        btnPosition.y += 100.f;
+        btn->setPosition(btnPosition);
+        btn->setOutlineThickness(0);
+        btn->setFillColor(sf::Color(255, 255, 255, 200));
+        menu2Buttons.push_back(btn);
+    }
+}
+
 
 
 
