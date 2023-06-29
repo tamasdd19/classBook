@@ -14,6 +14,7 @@ void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, 
 void menu2Student(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Student* student, sf::Font& font, sqlite3* db);
 void menu2Professor(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Professor* professor, sf::Font& font, sqlite3* db);
 void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::Sprite& background, Professor* professor, sf::Font& font, sqlite3* db);
+void courseStudentMenu(Course* course, Student* student, Button** otherButtons, sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db);
 
 int main()
 {
@@ -827,6 +828,7 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
     Button* btn;
     sf::Event event;
     std::vector<Student*> students;
+    Button** otherButtons = new Button*[2];
     std::string selectQuery = "SELECT * FROM users WHERE majorId = " + std::to_string(course->getMajorId()) + ";";
     int rc = sqlite3_exec(db, selectQuery.c_str(), getStudents, &students, 0);
     
@@ -845,6 +847,8 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
     btn->setOutlineThickness(0);
     buttons.push_back(btn);
     buttons.push_back(backBtn);
+    otherButtons[0] = btn;
+    otherButtons[1] = backBtn;
 
     for(auto& i : students)
     {
@@ -865,6 +869,7 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
     {
         while(window.pollEvent(event))
         {
+            auto iter = buttons.begin();
             switch(event.type)
             {
                 case sf::Event::Closed:
@@ -872,16 +877,22 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
                     window.close();
                     break;
                 case sf::Event::MouseMoved:
-                    if (buttons[1]->isMouseOver(window)) 
+                    ++ iter;
+                    
+                    for(; iter<buttons.end(); ++iter)
                     {
-                        buttons[1]->setOutlineThickness(3.f);
-                        buttons[1]->setOutlineColor(sf::Color::Black);
-                        buttons[1]->setFillColor(sf::Color(255, 255, 255, 250));
-                    }
-                    else
-                    {
-                        buttons[1]->setOutlineThickness(0);
-                        buttons[1]->setFillColor(sf::Color(255, 255, 255, 200));
+                        auto& i = *iter;
+                        if (i->isMouseOver(window)) 
+                        {
+                            i->setOutlineThickness(3.f);
+                            i->setOutlineColor(sf::Color::Black);
+                            i->setFillColor(sf::Color(255, 255, 255, 250));
+                        }
+                        else
+                        {
+                            i->setOutlineThickness(0);
+                            i->setFillColor(sf::Color(255, 255, 255, 200));
+                        }
                     }
                     break;
                 case sf::Event::MouseButtonPressed:
@@ -890,6 +901,21 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
                         if(buttons[1]->isMouseOver(window))
                         {
                             courseWindowOpen = false;
+                        }
+                        else
+                        {
+                            for(int i=2; i<buttons.size(); i++)
+                            {
+                                if(buttons[i]->isMouseOver(window))
+                                {
+                                    courseStudentMenu(course, students[i-2], otherButtons, window, background, font, db);
+                                    if(!window.isOpen())
+                                    {
+                                        courseWindowOpen = false;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                     break;
@@ -909,83 +935,87 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
     }
 }
 
-
-
-
-
-/*
-
-
-int main() 
+void courseStudentMenu(Course* course, Student* student, Button** otherButtons, sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db)
 {
-    Student* student; // in case the user is a student, to be able tu use student functions
-    Professor* professor;
-    sqlite3* db;
-    int rc = sqlite3_open("database.db", &db);
+    bool courseStudentMenuOpen = true;
+    Button* btn;
+    sf::Event event;
+    std::vector<Button*> buttons = {otherButtons[0]};
+    Button::resetButtonHeight();
 
-    if (rc == SQLITE_OK) 
+    btn = new Button(&Button::setCenter, window.getSize(), {400.f, 100.f}, student->getFirstName() + " " + student->getLastName(), font, 35);
+    sf::Vector2f btnPos = btn->getPosition();
+    btnPos.y += 130.f;
+    btn->setPosition(btnPos);
+    btn->setOutlineThickness(0);
+    btn->setFillColor(sf::Color(255, 255, 255, 200));
+    if(btn->isTextOutOfBounds())
     {
-        // Login phase, a very primitive version of it, but it works kind of
-        if (rc == SQLITE_OK) 
+        btn->setTextInBounds({20.f, 20.f});
+    }
+    buttons.push_back(btn);
+    buttons.push_back(otherButtons[1]);
+
+    TextInput textInput(&Button::setCenter, window.getSize(), {300.f, 50.f}, font, 35);
+    textInput.setFillColor(sf::Color(255, 255, 255, 200));
+    textInput.setOutlineColor(sf::Color(0, 0, 0, 50));
+    btnPos = textInput.getPosition();
+    btnPos.y += 150.f;
+    textInput.setPosition(btnPos);
+    buttons.push_back(&textInput);
+
+    while(courseStudentMenuOpen)
+    {
+        while(window.pollEvent(event))
         {
-            std::string name, password;
-            std::cout << "Enter name: ";
-            std::getline(std::cin, name);
-            std::cout << "Enter password: ";
-            std::cin >> password;
-            myData data;
-            data.name = name;
-            data.password = password;
-
-            const char* selectQuery = "SELECT * FROM users;";
-            rc = sqlite3_exec(db, selectQuery, callbackFunction, &data, 0);
-
-            if (rc == SQLITE_OK) 
+            auto iter = buttons.begin();
+            switch(event.type)
             {
-                // Still have to do connection after I log in somehow, something to do for later
-                if(login)
-                {  
-                    // Primitive version of being logged in, I can't to anything for now :((
-                    Major* major = new Major;
-                    student = static_cast<Student*>(user);
-                    std::string selectQuery;
-                    selectQuery = "SELECT * FROM major WHERE id = ";
-                    selectQuery += std::to_string(student->getMajorId());
-                    selectQuery += ";";
+                default:
+                    break;
+                case sf::Event::Closed:
+                    window.close();
+                    courseStudentMenuOpen = false;
+                    return ;
+                    break;
+                case sf::Event::MouseMoved:
+                    iter += 2;
                     
-                    rc = sqlite3_exec(db, selectQuery.c_str(), getMajor, major, 0); // GetMajor gets de id and name of the major
-                    
-                    selectQuery.replace(14, 5, "courses");
-                    selectQuery.replace(selectQuery.find("id"), 2, "majorId");
-
-                    MyData2 data2;
-                    data2.id = major->getId();
-
-                    rc = sqlite3_exec(db, selectQuery.c_str(), setMajorCourses, &data2, 0); // setMajorCourses sets the major courses up
-                    if(rc == SQLITE_OK)
+                    for(; iter<buttons.end(); ++iter)
                     {
-                        major->setCourses(data2.courses);
-
-                        student->setMajor(major);
-
-                        std::cout << student->getName() << " studiaza " << student->getMajor()->getName() << " si are urmatoarele cursuri: \n";
-                        for(auto& i : student->getMajor()->getCourses())
+                        auto& i = *iter;
+                        if (i->isMouseOver(window)) 
                         {
-                            std::cout << i->getName() << std::endl;
+                            i->setOutlineThickness(3.f);
+                            i->setOutlineColor(sf::Color::Black);
+                            i->setFillColor(sf::Color(255, 255, 255, 250));
+                        }
+                        else
+                        {
+                            i->setOutlineThickness(0);
+                            i->setFillColor(sf::Color(255, 255, 255, 200));
                         }
                     }
-                }
-                else if(!data.gasit)
-                {
-                    std::cout << name << " doesn't exist in the users database\n";
-                }
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if(event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        if(buttons[2]->isMouseOver(window))
+                        {
+                            courseStudentMenuOpen = false;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    break;
             }
         }
-
-        // Close the database
-        sqlite3_close(db);
+        window.clear();
+        window.draw(background);
+        for(auto& i : buttons)
+            i->draw(window);
+        window.display();
     }
-
-    return 0;
 }
-*/
