@@ -7,8 +7,8 @@
 #include "input.h"
 #include "databaseStuff.h"
 
-#define NAME_DEBUG "Prof1"
-#define PASSWORD_DEBUG "test"
+#define NAME_DEBUG "Student1" // user for input from keyboard
+#define PASSWORD_DEBUG "test" // pass for input from keyboard
 
 void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, User* user, sf::Font& font);
 void menu2Student(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Student* student, sf::Font& font, sqlite3* db);
@@ -941,6 +941,7 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
     Button* btn;
     sf::Event event;
     std::vector<Button*> buttons = {otherButtons[0]};
+    bool keyPressed = false;
     Button::resetButtonHeight();
 
     btn = new Button(&Button::setCenter, window.getSize(), {400.f, 100.f}, student->getFirstName() + " " + student->getLastName(), font, 35);
@@ -954,18 +955,29 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
         btn->setTextInBounds({20.f, 20.f});
     }
     buttons.push_back(btn);
+    btn = new Button(&Button::setCenter, window.getSize(), {200.f, 50.f}, "Enter grade", font, 30);
+    btnPos = btn->getPosition();
+    btnPos.y += 200.f;
+    btn->setPosition(btnPos);
+    btn->setOutlineThickness(0);
+    btn->setFillColor(sf::Color(255, 255, 255, 225));
+    buttons.push_back(btn);
     buttons.push_back(otherButtons[1]);
 
-    TextInput textInput(&Button::setCenter, window.getSize(), {300.f, 50.f}, font, 35);
+    TextInput textInput(&Button::setCenter, window.getSize(), {150.f, 50.f}, font, 35);
+    textInput.setText("test");
     textInput.setFillColor(sf::Color(255, 255, 255, 200));
     textInput.setOutlineColor(sf::Color(0, 0, 0, 50));
     btnPos = textInput.getPosition();
-    btnPos.y += 150.f;
+    btnPos.y += 200.f;
     textInput.setPosition(btnPos);
-    buttons.push_back(&textInput);
+    textInput.setSelected(true);
+    // buttons.push_back(&textInput);
 
     while(courseStudentMenuOpen)
     {
+        textInput.handleEvent(event, window, keyPressed);
+
         while(window.pollEvent(event))
         {
             auto iter = buttons.begin();
@@ -979,7 +991,7 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
                     return ;
                     break;
                 case sf::Event::MouseMoved:
-                    iter += 2;
+                    iter += 3;
                     
                     for(; iter<buttons.end(); ++iter)
                     {
@@ -1000,7 +1012,7 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
                 case sf::Event::MouseButtonPressed:
                     if(event.mouseButton.button == sf::Mouse::Left)
                     {
-                        if(buttons[2]->isMouseOver(window))
+                        if(buttons[3]->isMouseOver(window))
                         {
                             courseStudentMenuOpen = false;
                         }
@@ -1010,12 +1022,72 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
                         }
                     }
                     break;
+                case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Return)
+                    {
+                        if(!textInput.getText().empty())
+                        {
+                            if(textInput.getSelected())
+                                textInput.setSelected(false);
+                            try 
+                            {
+                                float grade = std::stof(textInput.getText());
+                                bool check = false;
+                                std::string query = "SELECT grade FROM grades WHERE courseId = " + std::to_string(course->getId()) + " AND studentId = " + std::to_string(student->getID()) + ";";
+                                int rc = sqlite3_exec(db, query.c_str(), checkIfGradeExists, &check, 0);
+                                if(rc != SQLITE_OK)
+                                {
+                                    std::cout << "Error trying to input the grade";
+                                    return ;
+                                }
+                                if(check) // there is a grade already for that
+                                {
+                                    std::string query = "UPDATE grades SET grade = " + std::to_string(grade) +
+                                                        " WHERE courseId = " + std::to_string(course->getId()) +
+                                                        " AND studentId = " + std::to_string(student->getID()) + ";";
+                                    rc = sqlite3_exec(db, query.c_str(), 0, 0, 0);
+                                    if (rc != SQLITE_OK) 
+                                    {
+                                        std::cout << "Error trying to update the grade\n";
+                                        return;
+                                    }
+                                }
+                                else // We have to insert the grade into the table
+                                {
+                                    query = "INSERT INTO grades (courseId, studentId, grade) VALUES (" + std::to_string(course->getId()) + ", " + std::to_string(student->getID()) + ", " + std::to_string(grade) + ");";
+                                    rc = sqlite3_exec(db, query.c_str(), 0, 0, 0);
+                                    if(rc != SQLITE_OK)
+                                    {
+                                        std::cout << "Error trying to insert the grade\n";
+                                        return ;
+                                    }
+
+                                }
+
+                            } 
+                            catch (const std::exception& e) 
+                            {
+                                std::cerr << "Conversion failed: " << e.what() << std::endl;
+                            }
+                            
+                        }
+                    }
+                // case sf::Event::KeyPressed:
+                //     if (event.key.code == sf::Keyboard::Backspace && textInput.getSelected() && !textInput.getText().empty())
+                //     {
+                //         textInput.deleteCharacter();
+                //     }
+                //     break;
             }
         }
+        
+        textInput.update();
+
         window.clear();
         window.draw(background);
         for(auto& i : buttons)
             i->draw(window);
+        textInput.draw(window);
         window.display();
     }
 }

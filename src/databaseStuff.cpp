@@ -92,3 +92,10 @@ int getStudents(void* data, int argc, char** argv, char** columnNames)
 
     return 0;
 }
+
+int checkIfGradeExists(void* data, int argc, char** argv, char** columnNames)
+{
+    bool* check = static_cast<bool*>(data);
+    *check = true;
+    return 0;
+}

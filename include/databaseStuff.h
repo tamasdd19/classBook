@@ -21,6 +21,12 @@ struct MyData2
     int id;
 };
 
+struct MyData3
+{
+    bool check = false;
+    float grade = 0.0f;
+};
+
 
 int callbackFunction(void* data, int argc, char** argv, char** columnNames);
 int getMajor(void* data, int argc, char** argv, char** columnNames);
@@ -28,3 +34,4 @@ int setMajorCourses(void* data, int argc, char** argv, char** columnNames);
 int getGrades(void* data, int argc, char** argv, char** columnNames);
 int getProfessorCourses(void* data, int argc, char** argv, char** columnNames);
 int getStudents(void* data, int argc, char** argv, char** columnNames);
+int checkIfGradeExists(void* data, int argc, char** argv, char** columnNames);

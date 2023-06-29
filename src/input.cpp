@@ -84,6 +84,8 @@ std::map<sf::Keyboard::Key, char> keyToCharMapping = {
     {sf::Keyboard::Num8, '8'},
     {sf::Keyboard::Num9, '9'},
     {sf::Keyboard::Num0, '0'},
+    {sf::Keyboard::Period, '.'},
+    {sf::Keyboard::BackSpace, '\b'},
 };
 
 // Function to convert sf::Keyboard::Key to char
@@ -99,45 +101,48 @@ char keyToChar(sf::Keyboard::Key key)
 
 void TextInput::handleEvent(sf::Event& event, sf::RenderWindow& window, bool& keyPressed)
 {
-    // while(window.pollEvent(event))
-    // 
-        switch(event.type)
-        {
-            case sf::Event::MouseButtonPressed:
-                if (event.mouseButton.button == sf::Mouse::Left)
-                {
-                    if(this->isMouseOver(window) && !this->getSelected())
-                    {   
-                        this->setSelected(true);
-                    }
-                    else if(this->getSelected() && !this->isMouseOver(window))
-                    {
-                        this->setSelected(false);
-                    }
+    switch(event.type)
+    {
+        case sf::Event::MouseButtonPressed:
+            if (event.mouseButton.button == sf::Mouse::Left)
+            {
+                if(this->isMouseOver(window) && !this->getSelected())
+                {   
+                    this->setSelected(true);
                 }
-                break;
-            case sf::Event::TextEntered:
-                if (event.text.unicode < 128 && this->getSelected() && (!keyPressed || (this->getText()[this->getText().size()-2] != static_cast<char>(event.text.unicode) && event.text.unicode != '\b'))) //|| this->getText()[this->getText().size()-2] != static_cast<char>(event.text.unicode)))
+                else if(this->getSelected() && !this->isMouseOver(window))
                 {
-                    if (event.text.unicode == '\b' && !this->getText().empty())
-                    {
-                        this->deleteCharacter();
-                    }
-                    else
-                    {
-                        this->appendCharacter(static_cast<char>(event.text.unicode));
-                        
-                    }
+                    this->setSelected(false);
+                }
+            }
+            break;
+        case sf::Event::TextEntered:
+            if (event.text.unicode < 128 && m_selected && (!keyPressed || (m_text[m_text.size()-2] != static_cast<char>(event.text.unicode) && event.text.unicode != '\b'))) 
+            {
+                if (event.text.unicode == '\b' && !this->getText().empty())
+                {
+                    this->deleteCharacter();
                     keyPressed = true;
                 }
-                break;
-            case sf::Event::KeyReleased:
-                if(std::toupper(this->getText()[this->getText().size()-2]) == keyToChar(event.key.code))
-                    keyPressed = false;
-                break;
-            default:
-                break;
-        }
+                else
+                {
+                    this->appendCharacter(static_cast<char>(event.text.unicode));
+                    if(this->isTextOutOfBounds())
+                        this->deleteCharacter();
+                    keyPressed = true;
+                }
+                
+            }
+            break;
+        case sf::Event::KeyReleased:
+            if(std::toupper(m_text[m_text.size()-2]) == keyToChar(event.key.code))
+                keyPressed = false;
+            else if(event.key.code == sf::Keyboard::BackSpace)
+                keyPressed = false;
+            break;
+        default:
+            break;
+    }
 }
 
 void TextInput::update()
