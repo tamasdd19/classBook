@@ -143,6 +143,18 @@ void Button::setPosition(const sf::Vector2f& position)
     m_text.setPosition(position.x + buttonSize.x / 2.f, position.y + buttonSize.y / 2.f);
 }
 
+void Button::setButtonPosition(const sf::Vector2f& position)
+{
+    m_button.setPosition(position);
+}
+
+void Button::setSideToSide(const sf::Vector2u& windowSize)
+{
+    m_button.setPosition({0.0f, m_button.getPosition().y}); // Sets the Button to be side-to-side
+    m_button.setSize({static_cast<float>(windowSize.x), m_button.getSize().y});
+}
+
+
 void Button::replaceText(const std::string& toReplace, const std::string& replace)
 {
     std::string replacement = m_text.getString();
@@ -163,6 +175,11 @@ void Button::isMouseOverFunction(void (*function)(Button&), Button& b)
 sf::Vector2f Button::getPosition() const
 {
     return m_button.getPosition();
+}
+
+sf::Vector2f Button::getSize() const
+{
+    return m_button.getSize();
 }
 
 void Button::setText(const std::string& text)
@@ -209,4 +226,20 @@ bool Button::isTextOutOfBounds()
     }
 
     return false;
+}
+
+void Button::setTextInBounds(const sf::Vector2f& buffer)
+{
+    sf::FloatRect buttonBounds = m_button.getGlobalBounds();
+    sf::FloatRect textBounds = m_text.getGlobalBounds();
+
+    sf::Vector2f newSize(textBounds.width + 2 * buffer.x, textBounds.height + buffer.y);
+
+        // Update the size of the button
+    m_button.setSize(newSize);
+
+    sf::Vector2f newPosition(buttonBounds.left-buffer.x, m_button.getPosition().y);
+    newPosition.x = std::min(newPosition.x, textBounds.left-buffer.x);
+    // Move the button to the new position
+    m_button.setPosition(newPosition);
 }

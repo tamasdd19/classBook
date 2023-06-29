@@ -28,6 +28,8 @@ public:
     void setSize(const sf::Vector2f& size);
     void setPositionCenter(const sf::Vector2u& windowSize);
     void setPosition(const sf::Vector2f&);
+    void setButtonPosition(const sf::Vector2f& position);
+    void setSideToSide(const sf::Vector2u& windowSize);
     void replaceText(const std::string& toReplace, const std::string& replace);
     void function();
     static sf::Vector2f setCenter(const sf::Vector2u&, const sf::Vector2f&);
@@ -35,7 +37,9 @@ public:
     static sf::Vector2f setRight(const sf::Vector2u&, const sf::Vector2f&);
     static void resetButtonHeight();
     sf::Vector2f getPosition() const;
+    sf::Vector2f getSize() const;
     bool isTextOutOfBounds();
+    void setTextInBounds(const sf::Vector2f& buffer);
 private:
     sf::RectangleShape m_button;
     sf::Text m_text;
