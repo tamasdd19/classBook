@@ -55,6 +55,16 @@
         "xutility": "cpp",
         "*.rh": "cpp",
         "fstream": "cpp",
-        "deque": "cpp"
+        "deque": "cpp",
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "cstdarg": "cpp",
+        "cwctype": "cpp",
+        "unordered_map": "cpp",
+        "memory_resource": "cpp",
+        "optional": "cpp",
+        "string_view": "cpp",
+        "sstream": "cpp",
+        "cinttypes": "cpp"
     }
 }

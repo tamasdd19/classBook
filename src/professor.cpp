@@ -11,3 +11,14 @@ Professor::Professor(const std::string& name)
 {
     
 }
+
+void Professor::setCourses(const std::vector<Course*>& courses)
+{
+    m_courses = courses;
+}
+
+std::vector<Course*> Professor::getCourses() const
+{
+    return m_courses;
+}
+

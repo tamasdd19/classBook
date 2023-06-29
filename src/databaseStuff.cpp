@@ -71,3 +71,10 @@ int getGrades(void* data, int argc, char** argv, char** columnNames)
     *grade = std::stof(argv[2]);
     return 0;
 }
+
+int getProfessorCourses(void* data, int argc, char** argv, char** columnNames)
+{
+    std::vector<Course*>* courses = static_cast<std::vector<Course*>*>(data);
+    courses->push_back(new Course(std::stoi(argv[0]), argv[1], std::stoi(argv[2])));
+    return 0;
+}

@@ -8,7 +8,7 @@ class Course
 {
 public:
     Course();
-    Course(int, const std::string&, int);
+    Course(int id, const std::string& name, int majorId);
     // Getters
     std::string getName() const;
     int getId() const;

@@ -26,3 +26,4 @@ int callbackFunction(void* data, int argc, char** argv, char** columnNames);
 int getMajor(void* data, int argc, char** argv, char** columnNames);
 int setMajorCourses(void* data, int argc, char** argv, char** columnNames);
 int getGrades(void* data, int argc, char** argv, char** columnNames);
+int getProfessorCourses(void* data, int argc, char** argv, char** columnNames);
