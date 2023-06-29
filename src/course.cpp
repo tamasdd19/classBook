@@ -11,6 +11,8 @@ Course::Course(int id, const std::string& name, int majorId)
 
 }
 
+//Getters
+
 std::string Course::getName() const
 {
     return m_name;
@@ -21,17 +23,21 @@ int Course::getId() const
     return m_Id;
 }
 
+int Course::getMajorId() const
+{
+    return m_majorId;
+}
 
-// StudentCourse::StudentCourse(const Course& course)
-// {
-//     m_name = course.getName();
-//     m_ID = course.getID();
-//     m_professors = course.getProfessors();
-// }
-
-// ProfessorCourse::ProfessorCourse(const Course& course)
-// {
-//     m_name = course.getName();
-//     m_ID = course.getID();
-//     m_students = course.getStudents();
-// }
+//Setters
+void Course::setId(int id)
+{
+    m_Id = id;
+}
+void Course::setMajorId(int id)
+{
+    m_majorId = id;
+}
+void Course::setName(const std::string& name)
+{
+    m_name = name;
+}

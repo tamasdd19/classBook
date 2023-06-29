@@ -7,12 +7,13 @@
 #include "input.h"
 #include "databaseStuff.h"
 
-#define NAME_DEBUG "Prof2"
+#define NAME_DEBUG "Prof1"
 #define PASSWORD_DEBUG "test"
 
 void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, User* user, sf::Font& font);
 void menu2Student(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Student* student, sf::Font& font, sqlite3* db);
 void menu2Professor(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Professor* professor, sf::Font& font, sqlite3* db);
+void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::Sprite& background, Professor* professor, sf::Font& font, sqlite3* db);
 
 int main()
 {
@@ -598,6 +599,16 @@ int main()
                                     menus[2] = false;
                                     menus[0] = true;
                                 }
+                                else
+                                {
+                                    for(int i = 2; i<menu2Buttons.size(); i++)
+                                    {
+                                        if(menu2Buttons[i]->isMouseOver(window))
+                                        {
+                                            courseMenu(professor->getCourses()[i-2], backBtn, window, backgroundProfessor, professor, font, db);
+                                        }
+                                    }
+                                }
                             }
                     }
                 }
@@ -808,6 +819,96 @@ void menu2Professor(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window
         menu2Buttons.push_back(btn);
     }
 }
+
+void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::Sprite& background, Professor* professor, sf::Font& font, sqlite3* db)
+{
+    bool courseWindowOpen = true;
+    std::vector<Button*> buttons;
+    Button* btn;
+    sf::Event event;
+    std::vector<Student*> students;
+    std::string selectQuery = "SELECT * FROM users WHERE majorId = " + std::to_string(course->getMajorId()) + ";";
+    int rc = sqlite3_exec(db, selectQuery.c_str(), getStudents, &students, 0);
+    
+    if(rc != SQLITE_OK)
+    {
+        std::cout << "Error getting the Students\n";
+        return ;
+    }
+
+    Button::resetButtonHeight();
+
+    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 105.f}, course->getName(), font, 50);
+    btn->setSideToSide(window.getSize());
+    btn->setFillColor(sf::Color(0, 0, 0, 150));
+    btn->setTextColor(sf::Color(255, 255, 255));
+    btn->setOutlineThickness(0);
+    buttons.push_back(btn);
+    buttons.push_back(backBtn);
+
+    for(auto& i : students)
+    {
+        Button* btn = new Button(&Button::setCenter, window.getSize(), {400.f, 50.f}, i->getFirstName() + " " + i->getLastName(), font, 28);
+        sf::Vector2f btnPosition = btn->getPosition();
+        // btnPosition.y += 50.f;
+        btn->setPosition(btnPosition);
+        btn->setOutlineThickness(0);
+        btn->setFillColor(sf::Color(255, 255, 255, 200));
+        if(btn->isTextOutOfBounds())
+        {
+            btn->setTextInBounds({20.f, 20.f});
+        }
+        buttons.push_back(btn);
+    }
+
+    while(courseWindowOpen)
+    {
+        while(window.pollEvent(event))
+        {
+            switch(event.type)
+            {
+                case sf::Event::Closed:
+                    courseWindowOpen = false;
+                    window.close();
+                    break;
+                case sf::Event::MouseMoved:
+                    if (buttons[1]->isMouseOver(window)) 
+                    {
+                        buttons[1]->setOutlineThickness(3.f);
+                        buttons[1]->setOutlineColor(sf::Color::Black);
+                        buttons[1]->setFillColor(sf::Color(255, 255, 255, 250));
+                    }
+                    else
+                    {
+                        buttons[1]->setOutlineThickness(0);
+                        buttons[1]->setFillColor(sf::Color(255, 255, 255, 200));
+                    }
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if(event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        if(buttons[1]->isMouseOver(window))
+                        {
+                            courseWindowOpen = false;
+                        }
+                    }
+                    break;
+
+            }
+        }
+        window.clear();
+        window.draw(background);
+        for(auto& i : buttons)
+            i->draw(window);
+        window.display();
+    }
+    for(auto& i : buttons)
+    {
+        if(i != backBtn)
+            delete i;
+    }
+}
+
 
 
 

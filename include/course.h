@@ -12,6 +12,7 @@ public:
     // Getters
     std::string getName() const;
     int getId() const;
+    int getMajorId() const;
     // Setters
     void setId(int);
     void setMajorId(int);

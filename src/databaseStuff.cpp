@@ -78,3 +78,17 @@ int getProfessorCourses(void* data, int argc, char** argv, char** columnNames)
     courses->push_back(new Course(std::stoi(argv[0]), argv[1], std::stoi(argv[2])));
     return 0;
 }
+
+int getStudents(void* data, int argc, char** argv, char** columnNames)
+{
+    std::vector<Student*>* students = static_cast<std::vector<Student*>*>(data);
+    Student* newStudent = new Student(argv[1], std::stoi(argv[4]));
+
+    newStudent->setId(std::stoi(argv[0]));
+    newStudent->setFirstName(argv[5]);
+    newStudent->setLastName(argv[6]);
+
+    students->push_back(newStudent);
+
+    return 0;
+}
