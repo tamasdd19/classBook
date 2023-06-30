@@ -81,6 +81,7 @@
 
 <p>Upon launching the ClassBook application, you will be presented with a login page. Enter your username and password to access the system. Depending on your user role (student or professor), you will have access to different features and functionalities.</p>
 
+<p>It is not connected to any server, the informations are from the database.db file in the main folder.</p>
 
 <p>Navigate through the menus by clicking on the desired options. Follow the on-screen instructions to interact with the system and perform various tasks such as viewing student data, grades, professor data, and assigning grades.</p>
 
