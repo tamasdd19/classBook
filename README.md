@@ -85,8 +85,13 @@
 
 <p>Navigate through the menus by clicking on the desired options. Follow the on-screen instructions to interact with the system and perform various tasks such as viewing student data, grades, professor data, and assigning grades.</p>
 
-<p>For testing purposes I have created 4 users, 2 students and 2 professors. The usernames are: Student1, Student2, Prof1, Prof2 and they all have the same password, test. Feel free to try out my project!
+<p>For testing purposes I have created 4 users, 2 students and 2 professors. The usernames are: Student1, Student2, Prof1, Prof2 and they all have the same password, test. Feel free to try out my project!</p>
 
+<h2>Future updates</h2>
+
+<p>At the moment there isn't any way to change/add/delete users/courses/etc from the database, future updates will provide an user called admin.</p>
+
+<p>If you log in as the admin, an admin page will show up where you will be able to simply modify data in a GUI fashion, like the rest of the app. For now though you can only do that with an auxilary application to open the database up. I personally use this one: https://sqlitebrowser.org</p>
 
 <h2>Acknowledgments</h2>
 
