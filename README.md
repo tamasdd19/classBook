@@ -6,7 +6,7 @@
 
 <h3>Login</h3>
 
-![loginPage](https://github.com/tamasdd19/classBook/assets/118727728/70ff779e-93ba-4ea9-b35d-1b1eab12d162)
+![loginPage](https://github.com/tamasdd19/classBook/assets/118727728/18e939c6-432b-4e49-ba99-1a0f03c1f940)
 <ul>
   <li>Users are required to provide their username and password to access the system.</li>
   <li>The login page verifies the credentials and grants access to the respective user roles.</li>
@@ -14,8 +14,7 @@
 
 <h3>Student Side</h3>
 
-![studentMain](https://github.com/tamasdd19/classBook/assets/118727728/adfaf906-1217-4cc0-ad7e-8e809e0e3b92)
-
+![studentMain](https://github.com/tamasdd19/classBook/assets/118727728/4eca3355-449e-4a0c-bf92-4f81c9c2c7d7)
 <ul>
   <li>Student users have access to three main options:</li>
   <ul>
@@ -27,7 +26,7 @@
 
 <h3>Professor Side</h3>
 
-![ProfessorMain](https://github.com/tamasdd19/classBook/assets/118727728/bdf7a29f-3735-4286-99e1-6149dca0f29c)
+![ProfessorMain](https://github.com/tamasdd19/classBook/assets/118727728/3bdb9875-c070-443e-962a-d23da070db19)
 <ul>
   <li>Professor users have access to three main options:</li>
   <ul>
