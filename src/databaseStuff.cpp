@@ -32,7 +32,6 @@ int callbackFunction(void* data, int argc, char** argv, char** columnNames)
                     mydata->user->setLastName(argv[i+5]);
                     mydata->user->setMale(std::stoi(argv[i+9]));
                     mydata->user->setCountryOrigin(argv[i+10]);
-                    std::cout << mydata->user->getUsername() << " has logged in!\n";
                     break;
                 }
                 else

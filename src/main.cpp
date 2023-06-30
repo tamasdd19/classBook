@@ -7,8 +7,15 @@
 #include "input.h"
 #include "databaseStuff.h"
 
-#define NAME_DEBUG "Student1" // user for input from keyboard
-#define PASSWORD_DEBUG "test" // pass for input from keyboard
+#define DEBUG 0
+
+#if DEBUG   
+#define NAME_DEBUG "Student2" 
+#define PASSWORD_DEBUG "test" 
+#else
+#define NAME_DEBUG user // user for input from keyboard
+#define PASSWORD_DEBUG pass // pass for input from keyboard
+#endif
 
 void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, User* user, sf::Font& font);
 void menu2Student(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Student* student, sf::Font& font, sqlite3* db);
@@ -938,7 +945,7 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
 void courseStudentMenu(Course* course, Student* student, Button** otherButtons, sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db)
 {
     bool courseStudentMenuOpen = true;
-    Button* btn;
+    Button* btn, *succesBtn, *errorBtn;
     sf::Event event;
     std::vector<Button*> buttons = {otherButtons[0]};
     bool keyPressed = false;
@@ -974,6 +981,24 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
     textInput.setSelected(true);
     // buttons.push_back(&textInput);
 
+    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 50.f}, "Grade added!", font, 30);
+    btn->setFillColor(sf::Color(0, 255, 0));
+    btn->setTextColor(sf::Color(0, 0, 0));
+    btn->setOutlineThickness(0);
+    btnPos = btn->getPosition();
+    btnPos.y -= 25.f;
+    btn->setPosition(btnPos);
+    succesBtn = btn;
+    
+    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 50.f}, "Error, invalid grade!", font, 30);
+    btn->setFillColor(sf::Color(255, 0, 0));
+    btn->setTextColor(sf::Color(0, 0, 0));
+    btn->setOutlineThickness(0);
+    btnPos = btn->getPosition();
+    btnPos.y -= 100.f;
+    btn->setPosition(btnPos);
+    errorBtn = btn;
+
     while(courseStudentMenuOpen)
     {
         textInput.handleEvent(event, window, keyPressed);
@@ -991,22 +1016,16 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
                     return ;
                     break;
                 case sf::Event::MouseMoved:
-                    iter += 3;
-                    
-                    for(; iter<buttons.end(); ++iter)
+                    if (buttons[3]->isMouseOver(window)) 
                     {
-                        auto& i = *iter;
-                        if (i->isMouseOver(window)) 
-                        {
-                            i->setOutlineThickness(3.f);
-                            i->setOutlineColor(sf::Color::Black);
-                            i->setFillColor(sf::Color(255, 255, 255, 250));
-                        }
-                        else
-                        {
-                            i->setOutlineThickness(0);
-                            i->setFillColor(sf::Color(255, 255, 255, 200));
-                        }
+                        buttons[3]->setOutlineThickness(3.f);
+                        buttons[3]->setOutlineColor(sf::Color::Black);
+                        buttons[3]->setFillColor(sf::Color(255, 255, 255, 250));
+                    }
+                    else
+                    {
+                        buttons[3]->setOutlineThickness(0);
+                        buttons[3]->setFillColor(sf::Color(255, 255, 255, 200));
                     }
                     break;
                 case sf::Event::MouseButtonPressed:
@@ -1032,6 +1051,10 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
                             try 
                             {
                                 float grade = std::stof(textInput.getText());
+                                if(grade < 0.f || grade > 10.f)
+                                {
+                                    throw std::invalid_argument("Invalid grade");
+                                }
                                 bool check = false;
                                 std::string query = "SELECT grade FROM grades WHERE courseId = " + std::to_string(course->getId()) + " AND studentId = " + std::to_string(student->getID()) + ";";
                                 int rc = sqlite3_exec(db, query.c_str(), checkIfGradeExists, &check, 0);
@@ -1040,7 +1063,7 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
                                     std::cout << "Error trying to input the grade";
                                     return ;
                                 }
-                                if(check) // there is a grade already for that
+                                if(check) // there is a grade already for that course and student
                                 {
                                     std::string query = "UPDATE grades SET grade = " + std::to_string(grade) +
                                                         " WHERE courseId = " + std::to_string(course->getId()) +
@@ -1051,6 +1074,8 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
                                         std::cout << "Error trying to update the grade\n";
                                         return;
                                     }
+                                    // Grade updated with success
+                                    buttons.push_back(succesBtn);
                                 }
                                 else // We have to insert the grade into the table
                                 {
@@ -1061,23 +1086,18 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
                                         std::cout << "Error trying to insert the grade\n";
                                         return ;
                                     }
-
+                                    // Grade inserted with success
+                                    buttons.push_back(succesBtn);
                                 }
 
                             } 
                             catch (const std::exception& e) 
                             {
-                                std::cerr << "Conversion failed: " << e.what() << std::endl;
+                                buttons.push_back(errorBtn);
                             }
-                            
+                            textInput.clearText();
                         }
                     }
-                // case sf::Event::KeyPressed:
-                //     if (event.key.code == sf::Keyboard::Backspace && textInput.getSelected() && !textInput.getText().empty())
-                //     {
-                //         textInput.deleteCharacter();
-                //     }
-                //     break;
             }
         }
         

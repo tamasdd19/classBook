@@ -3,7 +3,7 @@ LIBS = -lsfml-graphics -lsfml-window -lsfml-system -lsqlite3
 SRCS = $(wildcard src/*.cpp)
 OBJS = $(SRCS:.cpp=.o)
 
-EXECUTABLE = main.exe
+EXECUTABLE = classBook.exe
 
 .PHONY: clean all run
 
