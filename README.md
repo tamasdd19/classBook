@@ -41,15 +41,15 @@
   </ul>
 </ul>
 
-<h2>Dependency</h2>
+<h2>Dependencies</h2>
 
-<p>The ClassBook project has the following dependency:</p>
+<p>The ClassBook project has the following dependencies:</p>
 <ul>
-  <li>MinGW: version 13.1.0 is needed to compile the sfml code. This is only if you want to recompile the project</li>
-  <li>Makefile: it's easier to compile a lot of .cpp files with Makefile, if you want to compile the entire project without Makefile it's gonna be hard.</li>
+  <li>MinGW: version 10.3.0 is needed to compile the sfml code. This is only if you want to recompile the project.</li>
+  <li>Makefile: it's easier to compile a lot of .cpp files with Makefile. You can compile this project without it, but I highly recommend it for it's ease of use.</li>
 </ul>
 
-<p>Make sure to install the dependency before compiling the project.</p>
+<p>Make sure to install the dependencies before compiling the project.</p>
 
 <h2>Installation</h2>
 
