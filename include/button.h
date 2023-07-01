@@ -40,6 +40,7 @@ public:
     sf::Vector2f getSize() const;
     bool isTextOutOfBounds();
     void setTextInBounds(const sf::Vector2f& buffer);
+    void windowHover(sf::RenderWindow& window);
 private:
     sf::RectangleShape m_button;
     sf::Text m_text;

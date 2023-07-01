@@ -243,3 +243,18 @@ void Button::setTextInBounds(const sf::Vector2f& buffer)
     // Move the button to the new position
     m_button.setPosition(newPosition);
 }
+
+void Button::windowHover(sf::RenderWindow& window)
+{ 
+    if (this->isMouseOver(window)) 
+    {
+        this->setOutlineThickness(3.f);
+        this->setOutlineColor(sf::Color::Black);
+        this->setFillColor(sf::Color(255, 255, 255, 250));
+    }
+    else
+    {
+        this->setOutlineThickness(0);
+        this->setFillColor(sf::Color(255, 255, 255, 200));
+    }
+}
