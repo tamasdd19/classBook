@@ -6,7 +6,7 @@
 
 <h3>Login</h3>
 
-![loginPage](https://github.com/tamasdd19/classBook/assets/118727728/70ff779e-93ba-4ea9-b35d-1b1eab12d162)
+![loginPage](https://github.com/tamasdd19/classBook/assets/118727728/18e939c6-432b-4e49-ba99-1a0f03c1f940)
 <ul>
   <li>Users are required to provide their username and password to access the system.</li>
   <li>The login page verifies the credentials and grants access to the respective user roles.</li>
@@ -14,8 +14,7 @@
 
 <h3>Student Side</h3>
 
-![studentMain](https://github.com/tamasdd19/classBook/assets/118727728/adfaf906-1217-4cc0-ad7e-8e809e0e3b92)
-
+![studentMain](https://github.com/tamasdd19/classBook/assets/118727728/4eca3355-449e-4a0c-bf92-4f81c9c2c7d7)
 <ul>
   <li>Student users have access to three main options:</li>
   <ul>
@@ -27,7 +26,7 @@
 
 <h3>Professor Side</h3>
 
-![ProfessorMain](https://github.com/tamasdd19/classBook/assets/118727728/bdf7a29f-3735-4286-99e1-6149dca0f29c)
+![ProfessorMain](https://github.com/tamasdd19/classBook/assets/118727728/3bdb9875-c070-443e-962a-d23da070db19)
 <ul>
   <li>Professor users have access to three main options:</li>
   <ul>
@@ -47,6 +46,7 @@
 <p>The ClassBook project has the following dependency:</p>
 <ul>
   <li>MinGW: version 13.1.0 is needed to compile the sfml code. This is only if you want to recompile the project</li>
+  <li>Makefile: it's easier to compile a lot of .cpp files with Makefile, if you want to compile the entire project without Makefile it's gonna be hard.</li>
 </ul>
 
 <p>Make sure to install the dependency before compiling the project.</p>
@@ -85,8 +85,13 @@
 
 <p>Navigate through the menus by clicking on the desired options. Follow the on-screen instructions to interact with the system and perform various tasks such as viewing student data, grades, professor data, and assigning grades.</p>
 
-<p>For testing purposes I have created 4 users, 2 students and 2 professors. The usernames are: Student1, Student2, Prof1, Prof2 and they all have the same password, test. Feel free to try out my project!
+<p>For testing purposes I have created 4 users, 2 students and 2 professors. The usernames are: Student1, Student2, Prof1, Prof2 and they all have the same password, test. Feel free to try out my project!</p>
 
+<h2>Future updates</h2>
+
+<p>At the moment there isn't any way to change/add/delete users/courses/etc from the database, future updates will provide an user called admin.</p>
+
+<p>If you log in as the admin, an admin page will show up where you will be able to simply modify data in a GUI fashion, like the rest of the app. For now though you can only do that with an auxilary application to open the database up. I personally use this one: https://sqlitebrowser.org</p>
 
 <h2>Acknowledgments</h2>
 
