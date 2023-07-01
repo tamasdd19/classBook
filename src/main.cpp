@@ -17,10 +17,16 @@
 #define PASSWORD_DEBUG pass // pass for input from keyboard
 #endif
 
+// Updates menu1Buttons with all the data the user has, student or professor, it will show the first name, last name, dob, country of origin and gender
 void menu1Options(std::vector<Button*>& menu1Buttons, sf::RenderWindow& window, User* user, sf::Font& font);
+// Updates de menu2Buttons vector with all the courses the student is attending and all the grades the student gathered at every course.
+// If there is not a grade assigned, it will say not assigned
 void menu2Student(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Student* student, sf::Font& font, sqlite3* db);
+// Updates the menu2Buttons vector with all the courses the professor is teaching
 void menu2Professor(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, Professor* professor, sf::Font& font, sqlite3* db);
+// On the Professor's side, after the prof has selected a course, a menu is created with all the students attending that course, so the prof. can give any student attending a grade
 void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::Sprite& background, Professor* professor, sf::Font& font, sqlite3* db);
+// The menu where the professor can add grades to the student
 void courseStudentMenu(Course* course, Student* student, Button** otherButtons, sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db);
 
 int main()
@@ -170,10 +176,10 @@ int main()
                                     professorPage = true;
                                 }
                                 std::string titleText = "Welcome, ";
-                                if(studentPage)
+                                if(studentPage) // For the student, it shows it's first and last name
                                     titleText += userData.user->getFirstName() + " " + userData.user->getLastName();
-                                else
-                                    titleText += "Prof. " + userData.user->getFirstName();
+                                else // For the prof. it shows Prof. and it's last name Name
+                                    titleText += "Prof. " + userData.user->getLastName();
                                 loginPage = false;      
                                 sf::Vector2f position = title->getPosition();                          
                                 delete title;
@@ -183,8 +189,8 @@ int main()
                                 title->setOutlineThickness(0);
                                 title->setTextColor(sf::Color(255, 255, 255));
                                 title->setPositionCenter(window.getSize());
-                                if(title->getPosition().x < 0)
-                                {
+                                if(title->getPosition().x < 0) // Checks if the title is bigger than the screen itself 
+                                {                // and only shows the username, in case of someone with a very long name
                                     titleText = "Welcome, " + userData.user->getUsername();
                                     title->setText(titleText);
                                     title->setPositionCenter(window.getSize());
@@ -722,7 +728,6 @@ void menu2Student(std::vector<Button*>& menu2Buttons, sf::RenderWindow& window, 
     int rc;
     std::string selectQuery;
     sf::Vector2f btnPosition;
-    std::vector<float> grades;
     selectQuery = "SELECT * FROM major WHERE id = ";
     selectQuery += std::to_string(student->getMajorId());
     selectQuery += ";";
