@@ -1,14 +1,13 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
-#include <windows.h>
 #include <string.h>
 #include "button.h"
 #include "input.h"
 #include "databaseStuff.h"
 
 #define DEBUG 0
-#define ADMIN 1
+#define ADMIN 0
 
 #if DEBUG
 #define NAME_DEBUG "Student1" 
