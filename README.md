@@ -92,10 +92,3 @@
 <p>At the moment there isn't any way to change/add/delete users/courses/etc from the database, future updates will provide an user called admin.</p>
 
 <p>If you log in as the admin, an admin page will show up where you will be able to simply modify data in a GUI fashion, like the rest of the app. For now though you can only do that with an auxilary application to open the database up. I personally use this one: https://sqlitebrowser.org</p>
-
-<h2>Acknowledgments</h2>
-
-<ul>
-  <li><a href="https://www.sfml-dev.org/">SFML</a>: The Simple and Fast Multimedia Library.</li>
-  <li><a href="https://www.sqlite.org/">SQLite</a>: A C library for efficient database management.</li>
-</ul>
