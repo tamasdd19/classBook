@@ -182,9 +182,17 @@ sf::Vector2f Button::getSize() const
     return m_button.getSize();
 }
 
-void Button::setText(const std::string& text)
+void Button::setText(const std::string& text, const bool& setCenter)
 {
     m_text.setString(text);
+    if(setCenter)
+    {
+        sf::FloatRect textRect = m_text.getLocalBounds();
+        sf::Vector2f position = this->getPosition();
+        sf::Vector2f size = this->getSize();
+        m_text.setOrigin(textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f);
+        m_text.setPosition(position.x + size.x / 2.f, position.y + size.y / 2.f);
+    }
 }
 
 void Button::setTextPosition(const sf::Vector2f& position, const sf::Vector2f& size)
@@ -235,7 +243,7 @@ void Button::setTextInBounds(const sf::Vector2f& buffer)
 
     sf::Vector2f newSize(textBounds.width + 2 * buffer.x, textBounds.height + buffer.y);
 
-        // Update the size of the button
+    // Update the size of the button
     m_button.setSize(newSize);
 
     sf::Vector2f newPosition(buttonBounds.left-buffer.x, m_button.getPosition().y);

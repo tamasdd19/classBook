@@ -1,11 +1,13 @@
+#pragma once
+
 #include <iostream>
 #include <string>
 #include <string.h>
 #include <vector>
+#include <sql/sqlite3.h>
 #include "professor.h"
 #include "student.h"
 #include "course.h"
-#include "sql/sqlite3.h"
 
 struct MyData
 {

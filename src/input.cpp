@@ -149,7 +149,7 @@ void TextInput::update()
 {
     if(!m_password || m_text.empty())
     {
-        this->setText(m_text);
+        this->setText(m_text, false);
         return ;
     }
     else if(m_text[0] == 13)
@@ -163,7 +163,7 @@ void TextInput::update()
         aux[i] = '*';
         i++;
     }
-    this->setText(aux);
+    this->setText(aux, false);
     
     // if(m_selected)
     // {
