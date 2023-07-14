@@ -117,6 +117,8 @@ int main()
     window.setFramerateLimit(60);
     textInput->setSelected(true);
 
+    textInput->getText(); // for whatever reason if I don't to this, on my pc it will show the null char in the input box
+
     while (window.isOpen())
     {
         sf::Event event;
