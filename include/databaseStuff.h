@@ -5,6 +5,7 @@
 #include <string.h>
 #include <vector>
 #include <sql/sqlite3.h>
+#include <openssl/aes.h>
 #include "professor.h"
 #include "student.h"
 #include "course.h"
@@ -37,3 +38,5 @@ int getGrades(void* data, int argc, char** argv, char** columnNames);
 int getProfessorCourses(void* data, int argc, char** argv, char** columnNames);
 int getStudents(void* data, int argc, char** argv, char** columnNames);
 int checkIfGradeExists(void* data, int argc, char** argv, char** columnNames);
+std::string encryptPassword(const std::string& password, const std::string& key);
+std::string decryptPassword(const std::string& encrypted, const std::string& key);

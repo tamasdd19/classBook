@@ -98,3 +98,66 @@ int checkIfGradeExists(void* data, int argc, char** argv, char** columnNames)
     *check = true;
     return 0;
 }
+
+// Encrypt a password using AES
+std::string encryptPassword(const std::string& password, const std::string& key)
+{
+    std::string encrypted;
+    
+    AES_KEY aesKey;
+    AES_set_encrypt_key(reinterpret_cast<const unsigned char*>(key.c_str()), 128, &aesKey);
+    
+    unsigned char iv[AES_BLOCK_SIZE];
+    memset(iv, 0x00, sizeof(iv));
+    
+    int inputLength = password.length();
+    
+    // AES requires input to be a multiple of block size (16 bytes for AES-128)
+    int paddedLength = ((inputLength + AES_BLOCK_SIZE - 1) / AES_BLOCK_SIZE) * AES_BLOCK_SIZE;
+    
+    unsigned char* input = new unsigned char[paddedLength];
+    memset(input, 0x00, paddedLength);
+    memcpy(input, password.c_str(), inputLength);
+    
+    unsigned char* output = new unsigned char[paddedLength];
+    memset(output, 0x00, paddedLength);
+    
+    AES_cbc_encrypt(input, output, paddedLength, &aesKey, iv, AES_ENCRYPT);
+    
+    encrypted.assign(reinterpret_cast<char*>(output), paddedLength);
+    
+    delete[] input;
+    delete[] output;
+    
+    return encrypted;
+}
+
+// Decrypt an encrypted password using AES
+std::string decryptPassword(const std::string& encrypted, const std::string& key)
+{
+    std::string decrypted;
+    
+    AES_KEY aesKey;
+    AES_set_decrypt_key(reinterpret_cast<const unsigned char*>(key.c_str()), 128, &aesKey);
+    
+    unsigned char iv[AES_BLOCK_SIZE];
+    memset(iv, 0x00, sizeof(iv));
+    
+    int inputLength = encrypted.length();
+    
+    unsigned char* input = new unsigned char[inputLength];
+    memset(input, 0x00, inputLength);
+    memcpy(input, encrypted.c_str(), inputLength);
+    
+    unsigned char* output = new unsigned char[inputLength];
+    memset(output, 0x00, inputLength);
+    
+    AES_cbc_encrypt(input, output, inputLength, &aesKey, iv, AES_DECRYPT);
+    
+    decrypted.assign(reinterpret_cast<char*>(output));
+    
+    delete[] input;
+    delete[] output;
+    
+    return decrypted;
+}

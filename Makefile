@@ -1,4 +1,4 @@
-LIBS = -lsfml-graphics -lsfml-window -lsfml-system -lsqlite3
+LIBS = -lsfml-graphics -lsfml-window -lsfml-system -lsqlite3 -lcrypto
 
 SRCS = $(wildcard src/*.cpp)
 OBJS = $(SRCS:.cpp=.o)
