@@ -22,20 +22,10 @@
 #define PASSWORD_DEBUG pass // pass for input from keyboard
 #endif
 #endif
-#include <fstream>
 
 
 int main()
 {
-    std::ofstream f("password.txt");
-    std::string password = encryptPassword("test");
-    f << password << "\n";
-    std::cout << password << "\n\n";
-    password = encryptPassword("admin");
-    f << password << "\n";
-    std::cout << password << "\n";
-    f.close();
-    return 0;
     // Back End stuff setups
     Student* student = nullptr;
     Professor* professor = nullptr;
