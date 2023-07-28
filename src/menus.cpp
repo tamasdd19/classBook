@@ -555,22 +555,22 @@ void adminPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font,
                     {
                         if(iter == buttons.begin()+1)
                         {
-                            std::cout << "Users menu";
+                            // "Users menu"
                             adminUserPage(window, background, font, db, mainButtons);
                         }
                         else if(iter == buttons.begin()+2)
                         {
-                            std::cout << "Faculties menu";
+                            // "Faculties menu"
                             adminFacultiesPage(window, background, font, db, mainButtons);
                         }
                         else if(iter == buttons.begin()+3)
                         {
-                            std::cout << "Majors menu";
+                            // "Majors menu"
                             adminMajorsPage(window, background, font, db, mainButtons);
                         }
                         else if(iter == buttons.begin()+4)
                         {
-                            std::cout << "Courses menu";
+                            // "Courses menu"
                             adminCoursesPage(window, background, font, db, mainButtons);
                         }
                         else if(iter == buttons.begin()+5)
@@ -622,6 +622,10 @@ void adminUserPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& f
                     {
                         pageClosed = true;
                         return ;
+                    }
+                    else if(mainButtons[1]->isMouseOver(window))
+                    {
+                        // user add page
                     }
                 }
             default:
@@ -771,5 +775,68 @@ void adminMajorsPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font&
         for(auto& i : mainButtons)
             i->draw(window);
         window.display();
+    }
+}
+
+// Admin add pages
+namespace adminAdd
+{
+    void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+}
+
+// admin modify pages
+namespace adminModify
+{
+    void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+}
+
+// admin delete pages
+namespace adminDelete
+{
+    void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
+    }
+    void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    {
+        
     }
 }
