@@ -784,12 +784,53 @@ namespace adminAdd
 {
     void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn)
     {
-        std::vector<Button*> buttons;
-        buttons.push_back(titleBtn);
+        #define BTN_SIZE {500.f, 40.f}
+        #define BTN_CHAR_SIZE 25
+        Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
         sf::Event event;
+        std::vector<Button*> buttons;
+        Button* btn;
+        TextInput *username, *password, *firstName, *lastName;
         bool pageClosed = false;
-        while(!pageClosed)
-        {
+        bool keyPressed = false;
+        buttons.push_back(titleBtn);
+        btn = new Button(&Button::setCenter, window.getSize(), BTN_SIZE, "Enter username", font, BTN_CHAR_SIZE);
+        btn->setOutlineThickness(0.0f);
+        btn->setFillColor(sf::Color(255, 255, 255, 100));
+        buttons.push_back(btn);
+        username = new TextInput(&Button::setCenter, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        username->setOutlineThickness(0.0f);
+        buttons.push_back(username);
+        btn = new Button(&Button::setCenter, window.getSize(), BTN_SIZE, "Enter password", font, BTN_CHAR_SIZE);
+        btn->setOutlineThickness(0.0f);
+        btn->setFillColor(sf::Color(255, 255, 255, 100));
+        buttons.push_back(btn);
+        password = new TextInput(&Button::setCenter, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        password->setOutlineThickness(0.0f);
+        buttons.push_back(password);
+        btn = new Button(&Button::setCenter, window.getSize(), BTN_SIZE, "Enter first name", font, BTN_CHAR_SIZE);
+        btn->setOutlineThickness(0.0f);
+        btn->setFillColor(sf::Color(255, 255, 255, 100));
+        buttons.push_back(btn);
+        firstName = new TextInput(&Button::setCenter, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        firstName->setOutlineThickness(0.0f);
+        buttons.push_back(firstName);
+        btn = new Button(&Button::setCenter, window.getSize(), BTN_SIZE, "Enter last name", font, BTN_CHAR_SIZE);
+        btn->setOutlineThickness(0.0f);
+        btn->setFillColor(sf::Color(255, 255, 255, 100));
+        buttons.push_back(btn);
+        lastName = new TextInput(&Button::setCenter, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        lastName->setOutlineThickness(0.0f);
+        buttons.push_back(lastName);
+        btn = new Button(&Button::setCenter, window.getSize(), {500.f, 50.f}, "SUBMIT", font, 30);
+        btn->setFillColor(sf::Color(255, 255, 255, 200));
+        btn->setOutlineThickness(0);
+        buttons.push_back(btn);
+        std::vector<TextInput*> inputs = {username, password, firstName, lastName};
+        while(!pageClosed) // will have to add a few more pages to this admin add user, the next one
+        {               // will be with the dob, country of origin, wether it's male or not, and if it's a student or not
+            for(auto& i : inputs)
+                i->handleEvent(event, window, keyPressed);
             while(window.pollEvent(event))
             {
                 switch(event.type)
@@ -797,8 +838,13 @@ namespace adminAdd
                     case sf::Event::Closed:
                         window.close();
                         return ;
+                    case sf::Event::MouseMoved:
+                        btn->windowHover(window);
+                        break;
                 }
             }
+            for(auto& i : inputs)
+                i->update();
             window.clear();
             window.draw(background);
             for(auto& i : buttons)

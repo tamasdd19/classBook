@@ -1,11 +1,11 @@
 #include "button.h"
 #include <iostream>
 
-int Button::m_buttonsTotalHeight = SPACE_BETWEEN_LINES;
+int Button::m_buttonsTotalHeight = SPACE_BETWEEN_BUTTONS;
 
 void Button::resetButtonHeight()
 {
-    m_buttonsTotalHeight = SPACE_BETWEEN_LINES;
+    m_buttonsTotalHeight = SPACE_BETWEEN_BUTTONS;
 }
 
 Button::Button()
@@ -29,7 +29,7 @@ Button::Button(sf::Vector2f position, sf::Vector2f size, std::string text, sf::F
     sf::FloatRect textRect = m_text.getLocalBounds();
     m_text.setOrigin(textRect.left + textRect.width / 2.f, textRect.top + textRect.height / 2.f);
     m_text.setPosition(position.x + size.x / 2.f, position.y + size.y / 2.f);
-    Button::m_buttonsTotalHeight+=size.y + SPACE_BETWEEN_LINES;
+    Button::m_buttonsTotalHeight+=size.y + SPACE_BETWEEN_BUTTONS;
 }
 
 Button::Button(sf::Vector2f (*function)(const sf::Vector2u&, const sf::Vector2f&), const sf::Vector2u& windowSize, const sf::Vector2f& size, std::string text, sf::Font& font, int textSize)
@@ -60,7 +60,7 @@ Button::Button(sf::Vector2f position, std::string text, sf::Font& font, int text
     m_text.setPosition(position.x + buttonSize.x / 2.f, position.y + buttonSize.y / 2.f);
 
     if(addTotalHeight)
-        Button::m_buttonsTotalHeight += buttonSize.y + SPACE_BETWEEN_LINES;
+        Button::m_buttonsTotalHeight += buttonSize.y + SPACE_BETWEEN_BUTTONS;
 }
 
 sf::Vector2f Button::setCenter(const sf::Vector2u& windowSize, const sf::Vector2f& size)
@@ -259,10 +259,17 @@ void Button::windowHover(sf::RenderWindow& window)
         this->setOutlineThickness(3.f);
         this->setOutlineColor(sf::Color::Black);
         this->setFillColor(sf::Color(255, 255, 255, 250));
+        m_hover = true;
     }
-    else
+    else if(m_hover)
     {
         this->setOutlineThickness(0);
         this->setFillColor(sf::Color(255, 255, 255, 200));
+        m_hover = false;
     }
+}
+
+void Button::setButtonsTotalHeight(float height)
+{
+    Button::m_buttonsTotalHeight = height;
 }
