@@ -595,7 +595,7 @@ void adminUserPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& f
     bool pageClosed = false;
     sf::Event event;
     mainButtons[0]->setText("User Page", true);
-    while(!pageClosed)
+    while(!pageClosed && window.isOpen())
     {
         while(window.pollEvent(event))
         {
@@ -626,6 +626,7 @@ void adminUserPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& f
                     else if(mainButtons[1]->isMouseOver(window))
                     {
                         // user add page
+                        adminAdd::userPage(window, background, font, db, mainButtons[0]);
                     }
                 }
             default:
@@ -645,7 +646,7 @@ void adminFacultiesPage(sf::RenderWindow& window, sf::Sprite& background, sf::Fo
     bool pageClosed = false;
     sf::Event event;
     mainButtons[0]->setText("Faculties Page", true);
-    while(!pageClosed)
+    while(!pageClosed && window.isOpen())
     {
         while(window.pollEvent(event))
         {
@@ -691,7 +692,7 @@ void adminCoursesPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font
     bool pageClosed = false;
     sf::Event event;
     mainButtons[0]->setText("Courses Page", true);
-    while(!pageClosed)
+    while(!pageClosed && window.isOpen())
     {
         while(window.pollEvent(event))
         {
@@ -737,7 +738,7 @@ void adminMajorsPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font&
     bool pageClosed = false;
     sf::Event event;
     mainButtons[0]->setText("Majors Page", true);
-    while(!pageClosed)
+    while(!pageClosed && window.isOpen())
     {
         while(window.pollEvent(event))
         {
@@ -781,9 +782,29 @@ void adminMajorsPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font&
 // Admin add pages
 namespace adminAdd
 {
-    void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+    void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn)
     {
-        
+        std::vector<Button*> buttons;
+        buttons.push_back(titleBtn);
+        sf::Event event;
+        bool pageClosed = false;
+        while(!pageClosed)
+        {
+            while(window.pollEvent(event))
+            {
+                switch(event.type)
+                {
+                    case sf::Event::Closed:
+                        window.close();
+                        return ;
+                }
+            }
+            window.clear();
+            window.draw(background);
+            for(auto& i : buttons)
+                i->draw(window);
+            window.display();
+        }
     }
     void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
     {
