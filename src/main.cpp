@@ -8,7 +8,7 @@
 #include "menus.h"
 
 // #define DEBUG 0
-// #define ADMIN 0
+#define ADMIN 0
 
 #ifdef DEBUG
 #define NAME_DEBUG "Student1" 
@@ -43,7 +43,7 @@ int main()
 
     sf::Font font;
     font.loadFromFile("src/arial.ttf");
-
+    
     Button* title = new Button(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 100.f), "ClassBook!", font, 40);
     Button* errorLoginBtn = new Button(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Invalid data!", font);
     Button* userRect = new Button(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Username", font);

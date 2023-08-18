@@ -76,7 +76,6 @@ sf::Vector2f Button::setLeft(const sf::Vector2u& windowSize, const sf::Vector2f&
     sf::Vector2f toReturn;
     toReturn.x = 0.05f * windowSize.x;
     toReturn.y = Button::m_buttonsTotalHeight;
-    std::cout << toReturn.x << "   " << toReturn.y << std::endl;
     return toReturn;
 }
 
@@ -85,7 +84,6 @@ sf::Vector2f Button::setRight(const sf::Vector2u& windowSize, const sf::Vector2f
     sf::Vector2f toReturn;
     toReturn.x = windowSize.x - 0.05f * windowSize.x - size.x;
     toReturn.y = Button::m_buttonsTotalHeight;
-    std::cout << toReturn.x << "   " << toReturn.y << std::endl;
     return toReturn;
 }
 

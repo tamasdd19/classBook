@@ -580,6 +580,14 @@ void adminPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font,
                         }
                     }
                 }
+                break;
+            case sf::Event::KeyPressed:
+                if(event.key.code == sf::Keyboard::Escape)
+                {
+                    window.close();
+                    return ;
+                }
+                break;
             }
         }
         window.clear();
@@ -629,6 +637,14 @@ void adminUserPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& f
                         adminAdd::userPage(window, background, font, db, mainButtons[0]);
                     }
                 }
+                break;
+            case sf::Event::KeyPressed:
+                if(event.key.code == sf::Keyboard::Escape)
+                {
+                    pageClosed = true;
+                    return ;
+                }
+                break;
             default:
                 break;
             }
@@ -675,6 +691,14 @@ void adminFacultiesPage(sf::RenderWindow& window, sf::Sprite& background, sf::Fo
                         return ;
                     }
                 }
+                break;
+            case sf::Event::KeyPressed:
+                if(event.key.code == sf::Keyboard::Escape)
+                {
+                    pageClosed = true;
+                    return ;
+                }
+                break;
             default:
                 break;
             }
@@ -721,6 +745,14 @@ void adminCoursesPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font
                         return ;
                     }
                 }
+                break;
+            case sf::Event::KeyPressed:
+                if(event.key.code == sf::Keyboard::Escape)
+                {
+                    pageClosed = true;
+                    return ;
+                }
+                break;
             default:
                 break;
             }
@@ -767,6 +799,14 @@ void adminMajorsPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font&
                         return ;
                     }
                 }
+                break;
+            case sf::Event::KeyPressed:
+                if(event.key.code == sf::Keyboard::Escape)
+                {
+                    pageClosed = true;
+                    return ;
+                }
+                break;
             default:
                 break;
             }
@@ -790,43 +830,72 @@ namespace adminAdd
         sf::Event event;
         std::vector<Button*> buttons;
         Button* btn;
-        TextInput *username, *password, *firstName, *lastName;
-        bool pageClosed = false;
+        TextInput *username, *password, *firstName, *lastName, *country, *dob, *status, *gender;
+        bool pageClosed = false;                                                // status reffers to wheter is a student or a prof
         bool keyPressed = false;
         buttons.push_back(titleBtn);
-        btn = new Button(&Button::setCenter, window.getSize(), BTN_SIZE, "Enter username", font, BTN_CHAR_SIZE);
+        btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter username", font, BTN_CHAR_SIZE);
         btn->setOutlineThickness(0.0f);
         btn->setFillColor(sf::Color(255, 255, 255, 100));
         buttons.push_back(btn);
-        username = new TextInput(&Button::setCenter, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        username = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
         username->setOutlineThickness(0.0f);
         buttons.push_back(username);
-        btn = new Button(&Button::setCenter, window.getSize(), BTN_SIZE, "Enter password", font, BTN_CHAR_SIZE);
+        btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter password", font, BTN_CHAR_SIZE);
         btn->setOutlineThickness(0.0f);
         btn->setFillColor(sf::Color(255, 255, 255, 100));
         buttons.push_back(btn);
-        password = new TextInput(&Button::setCenter, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        password = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
         password->setOutlineThickness(0.0f);
         buttons.push_back(password);
-        btn = new Button(&Button::setCenter, window.getSize(), BTN_SIZE, "Enter first name", font, BTN_CHAR_SIZE);
+        btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter first name", font, BTN_CHAR_SIZE);
         btn->setOutlineThickness(0.0f);
         btn->setFillColor(sf::Color(255, 255, 255, 100));
         buttons.push_back(btn);
-        firstName = new TextInput(&Button::setCenter, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        firstName = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
         firstName->setOutlineThickness(0.0f);
         buttons.push_back(firstName);
-        btn = new Button(&Button::setCenter, window.getSize(), BTN_SIZE, "Enter last name", font, BTN_CHAR_SIZE);
+        btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter last name", font, BTN_CHAR_SIZE);
         btn->setOutlineThickness(0.0f);
         btn->setFillColor(sf::Color(255, 255, 255, 100));
         buttons.push_back(btn);
-        lastName = new TextInput(&Button::setCenter, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        lastName = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
         lastName->setOutlineThickness(0.0f);
         buttons.push_back(lastName);
-        btn = new Button(&Button::setCenter, window.getSize(), {500.f, 50.f}, "SUBMIT", font, 30);
+        Button::setButtonsTotalHeight(buttons[1]->getPosition().y);
+        btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Enter country of origin", font, BTN_CHAR_SIZE);
+        btn->setOutlineThickness(0.0f);
+        btn->setFillColor(sf::Color(255, 255, 255, 100));
+        buttons.push_back(btn);
+        country = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        country->setOutlineThickness(0.0f);
+        buttons.push_back(country);
+        btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Enter date of birth(dd/mm/yyyy)", font, BTN_CHAR_SIZE);
+        btn->setOutlineThickness(0.0f);
+        btn->setFillColor(sf::Color(255, 255, 255, 100));
+        buttons.push_back(btn);
+        dob = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        dob->setOutlineThickness(0.0f);
+        buttons.push_back(dob);
+        btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Is student/prof?(S/s=Student, P/p=Prof)", font, BTN_CHAR_SIZE);
+        btn->setOutlineThickness(0.0f);
+        btn->setFillColor(sf::Color(255, 255, 255, 100));
+        buttons.push_back(btn);
+        status = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        status->setOutlineThickness(0.0f);
+        buttons.push_back(status);
+        btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Is male/female(M/m=Male, F/f=Female)", font, BTN_CHAR_SIZE);
+        btn->setOutlineThickness(0.0f);
+        btn->setFillColor(sf::Color(255, 255, 255, 100));
+        buttons.push_back(btn);
+        gender = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+        gender->setOutlineThickness(0.0f);
+        buttons.push_back(gender);
+        btn = new Button(&Button::setCenter, window.getSize(), {500.f, 50.f}, "NEXT", font, 30);
         btn->setFillColor(sf::Color(255, 255, 255, 200));
         btn->setOutlineThickness(0);
         buttons.push_back(btn);
-        std::vector<TextInput*> inputs = {username, password, firstName, lastName};
+        std::vector<TextInput*> inputs = {username, password, firstName, lastName, country, dob, status, gender};
         while(!pageClosed) // will have to add a few more pages to this admin add user, the next one
         {               // will be with the dob, country of origin, wether it's male or not, and if it's a student or not
             for(auto& i : inputs)
@@ -841,6 +910,12 @@ namespace adminAdd
                     case sf::Event::MouseMoved:
                         btn->windowHover(window);
                         break;
+                    case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Escape)
+                    {
+                        pageClosed = true;
+                        return ;
+                    }
                 }
             }
             for(auto& i : inputs)

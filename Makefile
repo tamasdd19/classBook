@@ -16,7 +16,7 @@ $(EXECUTABLE): $(OBJS)
 	g++ -c -o $@ $< -Iinclude/
 
 clean:
-	rm -f $(OBJS) $(EXECUTABLE)
+	del $(EXECUTABLE)
 
 run: all
 	./$(EXECUTABLE)
