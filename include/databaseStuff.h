@@ -10,12 +10,15 @@
 #include "student.h"
 #include "course.h"
 
-struct MyData
+struct LoginData
 {
     std::string name, password;
-    bool gasit = false;
+    bool found = false;
     User* user = nullptr;
-    bool student = false;
+    Student* student = nullptr;
+    Professor* professor = nullptr;
+    bool isStudent = false;
+    bool isAdmin = false;
 };
 
 struct MyData2

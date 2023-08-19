@@ -2,36 +2,36 @@
 
 int callbackFunction(void* data, int argc, char** argv, char** columnNames) 
 {
-    MyData* mydata = static_cast<MyData*>(data);
+    LoginData* loginData = static_cast<LoginData*>(data);
     for (int i = 0; i < argc; i++) 
     {
         if(!strcmp(columnNames[i], "username"))
         {
             std::string checkName = argv[i];
 
-            if(checkName == mydata->name)
+            if(checkName == loginData->name)
             {
 
-                mydata->gasit = true;
+                loginData->found = true;
                 std::string checkPass = argv[i+1];
 
-                if(checkPass == mydata->password) // User has logged in
+                if(checkPass == loginData->password) // User has logged in
                 {
                     if(std::stoi(argv[i+2]))
                     {
-                        mydata->user = new Student(mydata->name, std::stoi(argv[i+3]));
-                        mydata->student = true;
+                        loginData->user = new Student(loginData->name, std::stoi(argv[i+3]));
+                        loginData->isStudent = true;
                     }
                     else
                     {
-                        mydata->user = new Professor(mydata->name);
+                        loginData->user = new Professor(loginData->name);
                     }
-                    mydata->user->setDateOfBirth(std::stoi(argv[i+6]), std::stoi(argv[i+7]), std::stoi(argv[i+8]));
-                    mydata->user->setId(std::stoi(argv[i-1]));
-                    mydata->user->setFirstName(argv[i+4]);
-                    mydata->user->setLastName(argv[i+5]);
-                    mydata->user->setMale(std::stoi(argv[i+9]));
-                    mydata->user->setCountryOrigin(argv[i+10]);
+                    loginData->user->setDateOfBirth(std::stoi(argv[i+6]), std::stoi(argv[i+7]), std::stoi(argv[i+8]));
+                    loginData->user->setId(std::stoi(argv[i-1]));
+                    loginData->user->setFirstName(argv[i+4]);
+                    loginData->user->setLastName(argv[i+5]);
+                    loginData->user->setMale(std::stoi(argv[i+9]));
+                    loginData->user->setCountryOrigin(argv[i+10]);
                     break;
                 }
                 else
