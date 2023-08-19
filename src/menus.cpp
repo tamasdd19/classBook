@@ -896,8 +896,8 @@ namespace adminAdd
         btn->setOutlineThickness(0);
         buttons.push_back(btn);
         std::vector<TextInput*> inputs = {username, password, firstName, lastName, country, dob, status, gender};
-        while(!pageClosed) // will have to add a few more pages to this admin add user, the next one
-        {               // will be with the dob, country of origin, wether it's male or not, and if it's a student or not
+        while(!pageClosed)
+        {               
             for(auto& i : inputs)
                 i->handleEvent(event, window, keyPressed);
             while(window.pollEvent(event))
@@ -910,12 +910,20 @@ namespace adminAdd
                     case sf::Event::MouseMoved:
                         btn->windowHover(window);
                         break;
+                    case sf::Event::MouseButtonPressed:
+                        if(event.mouseButton.button == sf::Mouse::Button::Left && btn->isMouseOver(window))
+                        {
+                            // This means the admin pressed next
+                            
+                        }
+                        break;
                     case sf::Event::KeyPressed:
-                    if(event.key.code == sf::Keyboard::Escape)
-                    {
-                        pageClosed = true;
-                        return ;
-                    }
+                        if(event.key.code == sf::Keyboard::Escape)
+                        {
+                            pageClosed = true;
+                            return ;
+                        }
+                        break;
                 }
             }
             for(auto& i : inputs)
