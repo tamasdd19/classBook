@@ -1,186 +1,19 @@
 #include "menus.h"
 
-LoginData* loginPage(sqlite3 *db, sf::RenderWindow& window, sf::Font& font, std::vector<Button*>& buttonsToDraw)
-{
-    sf::Texture texture;
-    if(!texture.loadFromFile("img/login-page-background.jpg"))
-    {
-        std::cout << "Image not loaded";
-    }
-    sf::Sprite background(texture);
-
-    LoginData* userData = new LoginData;
-    Student* student;
-    Professor* professor;
-    sf::Event event;
-    bool keyPressed = false;
-    bool studentPage = false;
-    bool professorPage = false;
-
-    Button* title = new Button(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 100.f), "ClassBook!", font, 40);
-    Button* errorLoginBtn = new Button(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Invalid data!", font);
-    Button* userRect = new Button(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Username", font);
-    TextInput* textInput = new TextInput(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 50.f), font);
-    Button* passRect = new Button(&Button::setCenter, window.getSize(), sf::Vector2f(200.f, 50.f), "Password", font);
-    TextInput* passInput = new TextInput(&Button::setCenter, window.getSize(), sf::Vector2f(300.f, 50.f), font);
-
-    textInput->setFillColor(sf::Color(255, 255, 255, 200));
-    textInput->setOutlineColor(sf::Color(0, 0, 0, 50));
-
-    passInput->setFillColor(sf::Color(255, 255, 255, 200));
-    passInput->setOutlineColor(sf::Color(0, 0, 0, 50));
-    passInput->setIsPassword(true);
-
-    title->setFillColor(sf::Color(255, 255, 255, 20));
-    title->setOutlineThickness(0);
-    title->setTextColor(sf::Color(0, 0, 0, 250));
-
-    errorLoginBtn->setFillColor(sf::Color::Red);
-    errorLoginBtn->setOutlineColor(sf::Color::Red);
-
-    userRect->setFillColor(sf::Color(255,255,255,150));
-    userRect->setOutlineColor(sf::Color(0, 0, 0, 50));
-
-    passRect->setFillColor(sf::Color(255,255,255,150));
-    passRect->setOutlineColor(sf::Color(0, 0, 0, 50));
-
-    buttonsToDraw.push_back(title);
-    buttonsToDraw.push_back(userRect);
-    buttonsToDraw.push_back(textInput);
-    buttonsToDraw.push_back(passRect);
-    buttonsToDraw.push_back(passInput);
-
-    textInput->setSelected(true);
-
-    textInput->getText(); // for whatever reason if I don't to this, on my pc it will show the null char in the input box
-
-    while (window.isOpen())  
-    {
-        textInput->handleEvent(event, window, keyPressed);
-        passInput->handleEvent(event, window, keyPressed);
-        while (window.pollEvent(event))
-        {
-            switch (event.type)
-            {
-                case sf::Event::Closed:
-                    window.close();
-                    break;
-                case sf::Event::KeyPressed:
-                    if(event.key.code == sf::Keyboard::Return)
-                    {
-                        if(textInput->getSelected() && passInput->getText().empty() && textInput->getText().size()>1)
-                        {
-                            textInput->setSelected(false);
-                            passInput->setSelected(true);
-                        }
-                        else
-                        {
-                            if(passInput->getSelected())
-                                passInput->setSelected(false);
-                            if(textInput->getSelected())
-                                textInput->setSelected(false);
-                            std::string user = textInput->getText();
-                            std::string pass = passInput->getText();
-                                                            
-
-                            textInput->clearText();
-                            passInput->clearText();
-
-                            userData->name = NAME_DEBUG;//user;
-                            userData->password = PASSWORD_DEBUG;//pass;
-                                                                        
-                            const char* selectQuery = "SELECT * FROM users;";
-                            int rc = sqlite3_exec(db, selectQuery, callbackFunction, userData, 0);
-                            if(rc != SQLITE_OK)
-                            {
-                                std::cout << "Error trying to connect!\n";
-                                return nullptr;
-                            }
-                            else if(!userData->found || userData->user == nullptr)
-                            {
-                                buttonsToDraw.push_back(errorLoginBtn);
-                                break;
-                            }
-
-                            std::string titleText = "Welcome, ";
-
-                            if(userData->isStudent)
-                            {
-                                userData->student = static_cast<Student*>(userData->user);
-                                titleText += userData->user->getFirstName() + " " + userData->user->getLastName();
-                                // For the student, it shows it's first and last name
-                            }
-                            else if(userData->user->getUsername() == "admin")
-                            {
-                                userData->isAdmin = true;
-                                return userData;
-
-                            }
-                            else
-                            {
-                                userData->professor = static_cast<Professor*>(userData->user);
-                                titleText += "Prof. " + userData->user->getLastName();
-                                // For the prof. it shows Prof. and its last Name
-                            }
-
-                            Button::resetButtonHeight();
-
-                            title = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, titleText, font, 50);
-                            title->setFillColor(sf::Color(0, 0, 0, 125));
-                            title->setOutlineThickness(0);
-                            title->setTextColor(sf::Color(255, 255, 255));
-                            if(title->getPosition().x < 0) // Checks if the title is bigger than the screen itself 
-                            {                // and only shows the username, in case of someone with a very long name
-                                titleText = "Welcome, " + userData->user->getUsername();
-                                title->setText(titleText, false);
-                                title->setPositionCenter(window.getSize());
-                            }
-                            title->setSideToSide(window.getSize());
-                            buttonsToDraw.clear();
-                            buttonsToDraw.push_back(title);
-                            if(userData->isStudent)
-                            {
-                                std::vector<std::string> menuOptions = {"Student's Data", "Grades", "Exit"};
-                                addButtonOptions(buttonsToDraw, {300.f, 100.f}, menuOptions, window.getSize(), font, 100.f);
-                            }
-                            else
-                            {
-                                title->setFillColor(sf::Color(0, 0, 0, 150));
-                                std::vector<std::string> menuOptions = {"Professor's Data", "GradeBook", "Exit"};
-                                addButtonOptions(buttonsToDraw, {300.f, 100.f}, menuOptions, window.getSize(), font, 100.f);
-                            }
-                            return userData;
-                        }
-                    }
-                    else if(event.key.code == sf::Keyboard::Escape)
-                    {
-                        window.close();
-                        return nullptr;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        textInput->update();
-        passInput->update();
-
-        window.clear();
-        window.draw(background);
-        for(auto& i : buttonsToDraw)
-            i->draw(window);
-        window.display();
-    }
-}
-
 namespace studentPage
 {
-    void mainPage(sqlite3* db, sf::RenderWindow& window, sf::Font& font, sf::Sprite& background, std::vector<Button*>& buttonsToDraw,std::vector<Button*>& dataButtons, std::vector<Button*>& gradeButtons, Student* student)
+    void mainPage(sqlite3* db, sf::RenderWindow& window, sf::Font& font, std::vector<Button*>& buttonsToDraw,std::vector<Button*>& dataButtons, std::vector<Button*>& gradeButtons, Student* student)
     {     
         sf::Event event;
         Button* backBtn = nullptr;
         
+        sf::Texture texture;
+        if(!texture.loadFromFile("img/student-page-background.jpg"))
+        {
+            std::cout << "Image not loaded";
+        }
+        sf::Sprite background(texture);
+
         while(window.isOpen())
         {
             while(window.pollEvent(event)) 
@@ -370,10 +203,18 @@ namespace studentPage
 
 namespace profPage
 {
-    void mainPage(sqlite3* db, sf::RenderWindow& window, sf::Font& font, sf::Sprite& background, std::vector<Button*>& buttonsToDraw, std::vector<Button*>& dataButtons, std::vector<Button*>& gradeBookButtons, Professor* prof)
+    void mainPage(sqlite3* db, sf::RenderWindow& window, sf::Font& font, std::vector<Button*>& buttonsToDraw, std::vector<Button*>& dataButtons, std::vector<Button*>& gradeBookButtons, Professor* professor)
     {
         sf::Event event;
         Button* backBtn = nullptr;
+
+        sf::Texture texture;
+        if(!texture.loadFromFile("img/professor-page-background.jpg"))
+        {
+            std::cout << "Image not loaded";
+        }
+         sf::Sprite background(texture);
+
         while(window.isOpen()) // Professor's main menu
         {
             while (window.pollEvent(event)) 
@@ -416,11 +257,12 @@ namespace profPage
                                 backBtn->setFillColor(sf::Color(255, 255, 255, 200));
                                 backBtn->setOutlineThickness(0);
                                 btnPosition = backBtn->getPosition();
-                                btnPosition.y -= 250.f;
+                                btnPosition.y += 125.f;
                                 backBtn->setPosition(btnPosition);
                                 dataButtons.push_back(buttonsToDraw[0]);
                                 dataButtons.push_back(backBtn);
                                 gradeBookButtons.push_back(backBtn);
+                                gradeBookButtons.push_back(buttonsToDraw[0]);
                             }
                             if (buttonsToDraw[1]->isMouseOver(window))  // Professor's Data
                             {
@@ -429,7 +271,7 @@ namespace profPage
                             }
                             else if (buttonsToDraw[2]->isMouseOver(window))  // GradeBook, to give grades and stuff
                             { 
-
+                                gradesPage(window, gradeBookButtons, background, professor, font, db);
                                 break;
                             }
                             else if (buttonsToDraw[3]->isMouseOver(window))  // Exit
@@ -506,7 +348,74 @@ namespace profPage
             window.display();
         }
     }
-    void gradesPage();
+    void gradesPage(sf::RenderWindow& window, std::vector<Button*>& gradeBookButtons, sf::Sprite& background, Professor* professor, sf::Font& font, sqlite3* db)
+    {
+        sf::Event event;
+        while(window.isOpen()) // Professor's GradeBook
+        {
+            while(window.pollEvent(event))
+            {
+                auto iter = gradeBookButtons.begin();
+                switch(event.type)
+                {
+                    default:
+                        break;
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+                    case sf::Event::MouseMoved:
+
+                        for (; iter != gradeBookButtons.end()-1; ++iter)
+                        {
+                            auto& i = *iter;
+                                    
+                            if (i->isMouseOver(window)) 
+                            {
+                                i->setOutlineThickness(3.f);
+                                i->setOutlineColor(sf::Color::Black);
+                                i->setFillColor(sf::Color(255, 255, 255, 250));
+                            }
+                            else
+                            {
+                                i->setOutlineThickness(0);
+                                i->setFillColor(sf::Color(255, 255, 255, 200));
+                            }
+                        }
+                        break;
+                    case sf::Event::MouseButtonPressed:
+                        if(event.mouseButton.button == sf::Mouse::Left)
+                        {
+                            if(gradeBookButtons[gradeBookButtons.size()-2]->isMouseOver(window))
+                            {
+                                return ;
+                            }
+                            else
+                            {
+                                for(int i = 0; i<gradeBookButtons.size()-2; i++)
+                                {
+                                    if(gradeBookButtons[i]->isMouseOver(window))
+                                    {
+                                        courseStudentsList(professor->getCourses()[i], gradeBookButtons[gradeBookButtons.size()-2], window, background, professor, font, db);
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    case sf::Event::KeyPressed:
+                        if(event.key.code == sf::Keyboard::Escape)
+                        {
+                            return ;
+                        }
+                        break;
+                }
+            }
+            window.clear();
+            window.draw(background);
+            for(auto& i : gradeBookButtons)
+                i->draw(window);
+            window.display();
+        }
+    }
 }
 
 void addButtonOptions(std::vector<Button*>& buttons, const sf::Vector2f& btnSize, std::vector<std::string>& textToAdd, const sf::Vector2u& windowSize, sf::Font& font, float buttonsDistance)
@@ -524,6 +433,7 @@ void addButtonOptions(std::vector<Button*>& buttons, const sf::Vector2f& btnSize
         buttons.push_back(btn);
     }
 }
+
 std::vector<Button*> userDataInfoButtons(sf::RenderWindow& window, User* user, sf::Font& font)
 {
     std::string btnText;
@@ -710,7 +620,10 @@ std::vector<Button*> profCoursesButtons(sf::RenderWindow& window, Professor* pro
         std::cout << "Error trying to get professor's courses\n";
         return menuButtons;
     }
+    
     professor->setCourses(courses);
+
+    Button::resetButtonHeight();
     // Once the courses are set up we can build the buttons!
     for(auto& i : professor->getCourses())
     {
@@ -729,8 +642,10 @@ std::vector<Button*> profCoursesButtons(sf::RenderWindow& window, Professor* pro
     return menuButtons;
 }
 
-void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::Sprite& background, Professor* professor, sf::Font& font, sqlite3* db)
+// courseMenu
+void courseStudentsList(Course* course, Button* backBtn, sf::RenderWindow& window, sf::Sprite& background, Professor* professor, sf::Font& font, sqlite3* db)
 {
+    // Loads up the users that attend the selected course by the professor, so the professor can give the student a grade
     bool courseWindowOpen = true;
     std::vector<Button*> buttons;
     Button* btn;
@@ -748,7 +663,7 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
 
     Button::resetButtonHeight();
 
-    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 105.f}, course->getName(), font, 50);
+    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, course->getName(), font, 50);
     btn->setSideToSide(window.getSize());
     btn->setFillColor(sf::Color(0, 0, 0, 150));
     btn->setTextColor(sf::Color(255, 255, 255));
@@ -815,7 +730,7 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
                             {
                                 if(buttons[i]->isMouseOver(window))
                                 {
-                                    courseStudentMenu(course, students[i-2], otherButtons, window, background, font, db);
+                                    giveGradeMenu(course, students[i-2], otherButtons, window, background, font, db);
                                     if(!window.isOpen())
                                     {
                                         courseWindowOpen = false;
@@ -847,7 +762,7 @@ void courseMenu(Course* course, Button* backBtn, sf::RenderWindow& window, sf::S
     }
 }
 
-void courseStudentMenu(Course* course, Student* student, Button** otherButtons, sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db)
+void giveGradeMenu(Course* course, Student* student, Button** otherButtons, sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db)
 {
     bool courseStudentMenuOpen = true;
     Button* btn, *succesBtn, *errorBtn;
@@ -1017,449 +932,113 @@ void courseStudentMenu(Course* course, Student* student, Button** otherButtons, 
     }
 }
 
-void adminPage(sf::RenderWindow& window, sf::Font& font, sqlite3* db)
+namespace adminPage
 {
-    std::vector<Button*> buttons;
-    Button* btn;
-    sf::Vector2f btnPos;
-    sf::Event event;
-    std::vector<std::string> options = {"Users", "Faculties", "Majors", "Courses", "Exit"};
-    Button::resetButtonHeight();
-    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Admin Page", font, 50);
-    btn->setSideToSide(window.getSize());
-    btn->setOutlineThickness(0);
-    btn->setFillColor(sf::Color(0, 0, 0, 150));
-    btn->setTextColor(sf::Color(255, 255, 255));
-    buttons.push_back(btn);
-    addButtonOptions(buttons, {300.f, 75.f}, options, window.getSize(), font, 50.f);
-
-    std::vector<std::string> menusOptions = {"Add", "Modify", "Delete", "Back"};
-    std::vector<Button*> mainButtons; // The buttons you see when you click users or faculties, etc..
-    Button::resetButtonHeight();
-    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Template Page", font, 50);
-    btn->setSideToSide(window.getSize());
-    btn->setOutlineThickness(0);
-    btn->setFillColor(sf::Color(0, 0, 0, 150));
-    btn->setTextColor(sf::Color(255, 255, 255));
-    mainButtons.push_back(btn);
-    addButtonOptions(mainButtons, {300.f, 75.f}, menusOptions, window.getSize(), font, 50.f);
-
-    sf::Texture texture;
-    if(!texture.loadFromFile("img/admin-page-background.jpg"))
+    void mainPage(sf::RenderWindow& window, sf::Font& font, sqlite3* db)
     {
-        std::cout << "Image not loaded";
-    }
-    sf::Sprite background(texture);
-    while(window.isOpen())
-    {
-        while(window.pollEvent(event))
+        std::vector<Button*> buttons;
+        Button* btn;
+        sf::Vector2f btnPos;
+        sf::Event event;
+        std::vector<std::string> options = {"Users", "Faculties", "Majors", "Courses", "Exit"};
+        Button::resetButtonHeight();
+        btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Admin Page", font, 50);
+        btn->setSideToSide(window.getSize());
+        btn->setOutlineThickness(0);
+        btn->setFillColor(sf::Color(0, 0, 0, 150));
+        btn->setTextColor(sf::Color(255, 255, 255));
+        buttons.push_back(btn);
+        addButtonOptions(buttons, {300.f, 75.f}, options, window.getSize(), font, 50.f);
+
+        std::vector<std::string> menusOptions = {"Add", "Modify", "Delete", "Back"};
+        std::vector<Button*> mainButtons; // The buttons you see when you click users or faculties, etc..
+        Button::resetButtonHeight();
+        btn = new Button(&Button::setCenter, window.getSize(), {300.f, 100.f}, "Template Page", font, 50);
+        btn->setSideToSide(window.getSize());
+        btn->setOutlineThickness(0);
+        btn->setFillColor(sf::Color(0, 0, 0, 150));
+        btn->setTextColor(sf::Color(255, 255, 255));
+        mainButtons.push_back(btn);
+        addButtonOptions(mainButtons, {300.f, 75.f}, menusOptions, window.getSize(), font, 50.f);
+
+        sf::Texture texture;
+        if(!texture.loadFromFile("img/admin-page-background.jpg"))
         {
-            auto iter = buttons.begin();
-            bool btnPressed = false;
-            switch(event.type)
+            std::cout << "Image not loaded";
+        }
+        sf::Sprite background(texture);
+        while(window.isOpen())
+        {
+            while(window.pollEvent(event))
             {
-            case sf::Event::Closed:
-                window.close();
-                break;
-            case sf::Event::MouseMoved:
-                ++iter;
-
-                for(; iter < buttons.end(); ++iter)
+                auto iter = buttons.begin();
+                bool btnPressed = false;
+                switch(event.type)
                 {
-                    auto& i = *iter;
-                    i->windowHover(window);
-                }
-                break;
-            case sf::Event::MouseButtonPressed:
-                if(event.mouseButton.button == sf::Mouse::Button::Left)
-                {
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+                case sf::Event::MouseMoved:
                     ++iter;
+
                     for(; iter < buttons.end(); ++iter)
                     {
                         auto& i = *iter;
-                        if(i->isMouseOver(window))
+                        i->windowHover(window);
+                    }
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if(event.mouseButton.button == sf::Mouse::Button::Left)
+                    {
+                        ++iter;
+                        for(; iter < buttons.end(); ++iter)
                         {
-                            btnPressed = true;
-                            break;
+                            auto& i = *iter;
+                            if(i->isMouseOver(window))
+                            {
+                                btnPressed = true;
+                                break;
+                            }
+                        }
+                        if(btnPressed)
+                        {
+                            if(iter == buttons.begin()+1)
+                            {
+                                // "Users menu"
+                                userPage(window, background, font, db, mainButtons);
+                            }
+                            else if(iter == buttons.begin()+2)
+                            {
+                                // "Faculties menu"
+                                facultiesPage(window, background, font, db, mainButtons);
+                            }
+                            else if(iter == buttons.begin()+3)
+                            {
+                                // "Majors menu"
+                                majorsPage(window, background, font, db, mainButtons);
+                            }
+                            else if(iter == buttons.begin()+4)
+                            {
+                                // "Courses menu"
+                                coursesPage(window, background, font, db, mainButtons);
+                            }
+                            else if(iter == buttons.begin()+5)
+                            {
+                                window.close();
+                                return ;
+                            }
                         }
                     }
-                    if(btnPressed)
+                    break;
+                case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Escape)
                     {
-                        if(iter == buttons.begin()+1)
-                        {
-                            // "Users menu"
-                            adminUserPage(window, background, font, db, mainButtons);
-                        }
-                        else if(iter == buttons.begin()+2)
-                        {
-                            // "Faculties menu"
-                            adminFacultiesPage(window, background, font, db, mainButtons);
-                        }
-                        else if(iter == buttons.begin()+3)
-                        {
-                            // "Majors menu"
-                            adminMajorsPage(window, background, font, db, mainButtons);
-                        }
-                        else if(iter == buttons.begin()+4)
-                        {
-                            // "Courses menu"
-                            adminCoursesPage(window, background, font, db, mainButtons);
-                        }
-                        else if(iter == buttons.begin()+5)
-                        {
-                            window.close();
-                            return ;
-                        }
-                    }
-                }
-                break;
-            case sf::Event::KeyPressed:
-                if(event.key.code == sf::Keyboard::Escape)
-                {
-                    window.close();
-                    return ;
-                }
-                break;
-            }
-        }
-        window.clear();
-        window.draw(background);
-        for(auto& i : buttons)
-            i->draw(window);
-        window.display();
-    }
-}
-
-void adminUserPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-{
-    bool pageClosed = false;
-    sf::Event event;
-    mainButtons[0]->setText("User Page", true);
-    while(!pageClosed && window.isOpen())
-    {
-        while(window.pollEvent(event))
-        {
-            auto iter = mainButtons.begin();
-            switch (event.type)
-            {
-            case sf::Event::Closed:
-                window.close();
-                return ;
-                break;
-            case sf::Event::MouseMoved:
-                ++iter;
-
-                for(; iter < mainButtons.end(); ++iter)
-                {
-                    auto& i = *iter;
-                    i->windowHover(window);
-                }
-                break;
-            case sf::Event::MouseButtonPressed:
-                if(event.mouseButton.button == sf::Mouse::Button::Left)
-                {
-                    if(mainButtons[mainButtons.size()-1]->isMouseOver(window))
-                    {
-                        pageClosed = true;
-                        return ;
-                    }
-                    else if(mainButtons[1]->isMouseOver(window))
-                    {
-                        // user add page
-                        adminAdd::userPage(window, background, font, db, mainButtons[0]);
-                    }
-                }
-                break;
-            case sf::Event::KeyPressed:
-                if(event.key.code == sf::Keyboard::Escape)
-                {
-                    pageClosed = true;
-                    return ;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-        window.clear();
-        window.draw(background);
-        for(auto& i : mainButtons)
-            i->draw(window);
-        window.display();
-    }
-}
-
-void adminFacultiesPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-{
-    bool pageClosed = false;
-    sf::Event event;
-    mainButtons[0]->setText("Faculties Page", true);
-    while(!pageClosed && window.isOpen())
-    {
-        while(window.pollEvent(event))
-        {
-            auto iter = mainButtons.begin();
-            switch (event.type)
-            {
-            case sf::Event::Closed:
-                window.close();
-                return ;
-                break;
-            case sf::Event::MouseMoved:
-                ++iter;
-
-                for(; iter < mainButtons.end(); ++iter)
-                {
-                    auto& i = *iter;
-                    i->windowHover(window);
-                }
-                break;
-            case sf::Event::MouseButtonPressed:
-                if(event.mouseButton.button == sf::Mouse::Button::Left)
-                {
-                    if(mainButtons[mainButtons.size()-1]->isMouseOver(window))
-                    {
-                        pageClosed = true;
-                        return ;
-                    }
-                }
-                break;
-            case sf::Event::KeyPressed:
-                if(event.key.code == sf::Keyboard::Escape)
-                {
-                    pageClosed = true;
-                    return ;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-        window.clear();
-        window.draw(background);
-        for(auto& i : mainButtons)
-            i->draw(window);
-        window.display();
-    }
-}
-
-void adminCoursesPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-{
-    bool pageClosed = false;
-    sf::Event event;
-    mainButtons[0]->setText("Courses Page", true);
-    while(!pageClosed && window.isOpen())
-    {
-        while(window.pollEvent(event))
-        {
-            auto iter = mainButtons.begin();
-            switch (event.type)
-            {
-            case sf::Event::Closed:
-                window.close();
-                return ;
-                break;
-            case sf::Event::MouseMoved:
-                ++iter;
-
-                for(; iter < mainButtons.end(); ++iter)
-                {
-                    auto& i = *iter;
-                    i->windowHover(window);
-                }
-                break;
-            case sf::Event::MouseButtonPressed:
-                if(event.mouseButton.button == sf::Mouse::Button::Left)
-                {
-                    if(mainButtons[mainButtons.size()-1]->isMouseOver(window))
-                    {
-                        pageClosed = true;
-                        return ;
-                    }
-                }
-                break;
-            case sf::Event::KeyPressed:
-                if(event.key.code == sf::Keyboard::Escape)
-                {
-                    pageClosed = true;
-                    return ;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-        window.clear();
-        window.draw(background);
-        for(auto& i : mainButtons)
-            i->draw(window);
-        window.display();
-    }
-}
-
-void adminMajorsPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-{
-    bool pageClosed = false;
-    sf::Event event;
-    mainButtons[0]->setText("Majors Page", true);
-    while(!pageClosed && window.isOpen())
-    {
-        while(window.pollEvent(event))
-        {
-            auto iter = mainButtons.begin();
-            switch (event.type)
-            {
-            case sf::Event::Closed:
-                window.close();
-                return ;
-                break;
-            case sf::Event::MouseMoved:
-                ++iter;
-
-                for(; iter < mainButtons.end(); ++iter)
-                {
-                    auto& i = *iter;
-                    i->windowHover(window);
-                }
-                break;
-            case sf::Event::MouseButtonPressed:
-                if(event.mouseButton.button == sf::Mouse::Button::Left)
-                {
-                    if(mainButtons[mainButtons.size()-1]->isMouseOver(window))
-                    {
-                        pageClosed = true;
-                        return ;
-                    }
-                }
-                break;
-            case sf::Event::KeyPressed:
-                if(event.key.code == sf::Keyboard::Escape)
-                {
-                    pageClosed = true;
-                    return ;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-        window.clear();
-        window.draw(background);
-        for(auto& i : mainButtons)
-            i->draw(window);
-        window.display();
-    }
-}
-
-// Admin add pages
-namespace adminAdd
-{
-    void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn)
-    {
-        #define BTN_SIZE {500.f, 40.f}
-        #define BTN_CHAR_SIZE 25
-        Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
-        sf::Event event;
-        std::vector<Button*> buttons;
-        Button* btn;
-        TextInput *username, *password, *firstName, *lastName, *country, *dob, *status, *gender;
-        bool pageClosed = false;                                                // status reffers to wheter is a student or a prof
-        bool keyPressed = false;
-        buttons.push_back(titleBtn);
-        btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter username", font, BTN_CHAR_SIZE);
-        btn->setOutlineThickness(0.0f);
-        btn->setFillColor(sf::Color(255, 255, 255, 100));
-        buttons.push_back(btn);
-        username = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
-        username->setOutlineThickness(0.0f);
-        buttons.push_back(username);
-        btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter password", font, BTN_CHAR_SIZE);
-        btn->setOutlineThickness(0.0f);
-        btn->setFillColor(sf::Color(255, 255, 255, 100));
-        buttons.push_back(btn);
-        password = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
-        password->setOutlineThickness(0.0f);
-        buttons.push_back(password);
-        btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter first name", font, BTN_CHAR_SIZE);
-        btn->setOutlineThickness(0.0f);
-        btn->setFillColor(sf::Color(255, 255, 255, 100));
-        buttons.push_back(btn);
-        firstName = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
-        firstName->setOutlineThickness(0.0f);
-        buttons.push_back(firstName);
-        btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter last name", font, BTN_CHAR_SIZE);
-        btn->setOutlineThickness(0.0f);
-        btn->setFillColor(sf::Color(255, 255, 255, 100));
-        buttons.push_back(btn);
-        lastName = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
-        lastName->setOutlineThickness(0.0f);
-        buttons.push_back(lastName);
-        Button::setButtonsTotalHeight(buttons[1]->getPosition().y);
-        btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Enter country of origin", font, BTN_CHAR_SIZE);
-        btn->setOutlineThickness(0.0f);
-        btn->setFillColor(sf::Color(255, 255, 255, 100));
-        buttons.push_back(btn);
-        country = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
-        country->setOutlineThickness(0.0f);
-        buttons.push_back(country);
-        btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Enter date of birth(dd/mm/yyyy)", font, BTN_CHAR_SIZE);
-        btn->setOutlineThickness(0.0f);
-        btn->setFillColor(sf::Color(255, 255, 255, 100));
-        buttons.push_back(btn);
-        dob = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
-        dob->setOutlineThickness(0.0f);
-        buttons.push_back(dob);
-        btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Is student/prof?(S/s=Student, P/p=Prof)", font, BTN_CHAR_SIZE);
-        btn->setOutlineThickness(0.0f);
-        btn->setFillColor(sf::Color(255, 255, 255, 100));
-        buttons.push_back(btn);
-        status = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
-        status->setOutlineThickness(0.0f);
-        buttons.push_back(status);
-        btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Is male/female(M/m=Male, F/f=Female)", font, BTN_CHAR_SIZE);
-        btn->setOutlineThickness(0.0f);
-        btn->setFillColor(sf::Color(255, 255, 255, 100));
-        buttons.push_back(btn);
-        gender = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
-        gender->setOutlineThickness(0.0f);
-        buttons.push_back(gender);
-        btn = new Button(&Button::setCenter, window.getSize(), {500.f, 50.f}, "NEXT", font, 30);
-        btn->setFillColor(sf::Color(255, 255, 255, 200));
-        btn->setOutlineThickness(0);
-        buttons.push_back(btn);
-        std::vector<TextInput*> inputs = {username, password, firstName, lastName, country, dob, status, gender};
-        while(!pageClosed)
-        {               
-            for(auto& i : inputs)
-                i->handleEvent(event, window, keyPressed);
-            while(window.pollEvent(event))
-            {
-                switch(event.type)
-                {
-                    case sf::Event::Closed:
                         window.close();
                         return ;
-                    case sf::Event::MouseMoved:
-                        btn->windowHover(window);
-                        break;
-                    case sf::Event::MouseButtonPressed:
-                        if(event.mouseButton.button == sf::Mouse::Button::Left && btn->isMouseOver(window))
-                        {
-                            // This means the admin pressed next
-                            
-                        }
-                        break;
-                    case sf::Event::KeyPressed:
-                        if(event.key.code == sf::Keyboard::Escape)
-                        {
-                            pageClosed = true;
-                            return ;
-                        }
-                        break;
+                    }
+                    break;
                 }
             }
-            for(auto& i : inputs)
-                i->update();
             window.clear();
             window.draw(background);
             for(auto& i : buttons)
@@ -1467,58 +1046,397 @@ namespace adminAdd
             window.display();
         }
     }
-    void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-    {
-        
-    }
-    void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-    {
-        
-    }
-    void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-    {
-        
-    }
-}
 
-// admin modify pages
-namespace adminModify
-{
     void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
     {
-        
-    }
-    void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-    {
-        
-    }
-    void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-    {
-        
-    }
-    void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-    {
-        
-    }
-}
+        bool pageClosed = false;
+        sf::Event event;
+        mainButtons[0]->setText("User Page", true);
+        while(!pageClosed && window.isOpen())
+        {
+            while(window.pollEvent(event))
+            {
+                auto iter = mainButtons.begin();
+                switch (event.type)
+                {
+                case sf::Event::Closed:
+                    window.close();
+                    return ;
+                    break;
+                case sf::Event::MouseMoved:
+                    ++iter;
 
-// admin delete pages
-namespace adminDelete
-{
-    void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
-    {
-        
+                    for(; iter < mainButtons.end(); ++iter)
+                    {
+                        auto& i = *iter;
+                        i->windowHover(window);
+                    }
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if(event.mouseButton.button == sf::Mouse::Button::Left)
+                    {
+                        if(mainButtons[mainButtons.size()-1]->isMouseOver(window))
+                        {
+                            pageClosed = true;
+                            return ;
+                        }
+                        else if(mainButtons[1]->isMouseOver(window))
+                        {
+                            // user add page
+                            add::userPage(window, background, font, db, mainButtons[0]);
+                        }
+                    }
+                    break;
+                case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Escape)
+                    {
+                        pageClosed = true;
+                        return ;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            window.clear();
+            window.draw(background);
+            for(auto& i : mainButtons)
+                i->draw(window);
+            window.display();
+        }
     }
-    void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+
+    void facultiesPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
     {
-        
+        bool pageClosed = false;
+        sf::Event event;
+        mainButtons[0]->setText("Faculties Page", true);
+        while(!pageClosed && window.isOpen())
+        {
+            while(window.pollEvent(event))
+            {
+                auto iter = mainButtons.begin();
+                switch (event.type)
+                {
+                case sf::Event::Closed:
+                    window.close();
+                    return ;
+                    break;
+                case sf::Event::MouseMoved:
+                    ++iter;
+
+                    for(; iter < mainButtons.end(); ++iter)
+                    {
+                        auto& i = *iter;
+                        i->windowHover(window);
+                    }
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if(event.mouseButton.button == sf::Mouse::Button::Left)
+                    {
+                        if(mainButtons[mainButtons.size()-1]->isMouseOver(window))
+                        {
+                            pageClosed = true;
+                            return ;
+                        }
+                    }
+                    break;
+                case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Escape)
+                    {
+                        pageClosed = true;
+                        return ;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            window.clear();
+            window.draw(background);
+            for(auto& i : mainButtons)
+                i->draw(window);
+            window.display();
+        }
     }
-    void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+
+    void coursesPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
     {
-        
+        bool pageClosed = false;
+        sf::Event event;
+        mainButtons[0]->setText("Courses Page", true);
+        while(!pageClosed && window.isOpen())
+        {
+            while(window.pollEvent(event))
+            {
+                auto iter = mainButtons.begin();
+                switch (event.type)
+                {
+                case sf::Event::Closed:
+                    window.close();
+                    return ;
+                    break;
+                case sf::Event::MouseMoved:
+                    ++iter;
+
+                    for(; iter < mainButtons.end(); ++iter)
+                    {
+                        auto& i = *iter;
+                        i->windowHover(window);
+                    }
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if(event.mouseButton.button == sf::Mouse::Button::Left)
+                    {
+                        if(mainButtons[mainButtons.size()-1]->isMouseOver(window))
+                        {
+                            pageClosed = true;
+                            return ;
+                        }
+                    }
+                    break;
+                case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Escape)
+                    {
+                        pageClosed = true;
+                        return ;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            window.clear();
+            window.draw(background);
+            for(auto& i : mainButtons)
+                i->draw(window);
+            window.display();
+        }
     }
-    void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+
+    void majorsPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
     {
-        
+        bool pageClosed = false;
+        sf::Event event;
+        mainButtons[0]->setText("Majors Page", true);
+        while(!pageClosed && window.isOpen())
+        {
+            while(window.pollEvent(event))
+            {
+                auto iter = mainButtons.begin();
+                switch (event.type)
+                {
+                case sf::Event::Closed:
+                    window.close();
+                    return ;
+                    break;
+                case sf::Event::MouseMoved:
+                    ++iter;
+
+                    for(; iter < mainButtons.end(); ++iter)
+                    {
+                        auto& i = *iter;
+                        i->windowHover(window);
+                    }
+                    break;
+                case sf::Event::MouseButtonPressed:
+                    if(event.mouseButton.button == sf::Mouse::Button::Left)
+                    {
+                        if(mainButtons[mainButtons.size()-1]->isMouseOver(window))
+                        {
+                            pageClosed = true;
+                            return ;
+                        }
+                    }
+                    break;
+                case sf::Event::KeyPressed:
+                    if(event.key.code == sf::Keyboard::Escape)
+                    {
+                        pageClosed = true;
+                        return ;
+                    }
+                    break;
+                default:
+                    break;
+                }
+            }
+            window.clear();
+            window.draw(background);
+            for(auto& i : mainButtons)
+                i->draw(window);
+            window.display();
+        }
+    }
+
+    // Admin add pages
+    namespace add
+    {
+        void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn)
+        {
+            #define BTN_SIZE {500.f, 40.f}
+            #define BTN_CHAR_SIZE 25
+            Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+            sf::Event event;
+            std::vector<Button*> buttons;
+            Button* btn;
+            TextInput *username, *password, *firstName, *lastName, *country, *dob, *status, *gender;
+            bool pageClosed = false;                                                // status reffers to wheter is a student or a prof
+            bool keyPressed = false;
+            buttons.push_back(titleBtn);
+            btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter username", font, BTN_CHAR_SIZE);
+            btn->setOutlineThickness(0.0f);
+            btn->setFillColor(sf::Color(255, 255, 255, 100));
+            buttons.push_back(btn);
+            username = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+            username->setOutlineThickness(0.0f);
+            buttons.push_back(username);
+            btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter password", font, BTN_CHAR_SIZE);
+            btn->setOutlineThickness(0.0f);
+            btn->setFillColor(sf::Color(255, 255, 255, 100));
+            buttons.push_back(btn);
+            password = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+            password->setOutlineThickness(0.0f);
+            buttons.push_back(password);
+            btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter first name", font, BTN_CHAR_SIZE);
+            btn->setOutlineThickness(0.0f);
+            btn->setFillColor(sf::Color(255, 255, 255, 100));
+            buttons.push_back(btn);
+            firstName = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+            firstName->setOutlineThickness(0.0f);
+            buttons.push_back(firstName);
+            btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter last name", font, BTN_CHAR_SIZE);
+            btn->setOutlineThickness(0.0f);
+            btn->setFillColor(sf::Color(255, 255, 255, 100));
+            buttons.push_back(btn);
+            lastName = new TextInput(&Button::setLeft, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+            lastName->setOutlineThickness(0.0f);
+            buttons.push_back(lastName);
+            Button::setButtonsTotalHeight(buttons[1]->getPosition().y);
+            btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Enter country of origin", font, BTN_CHAR_SIZE);
+            btn->setOutlineThickness(0.0f);
+            btn->setFillColor(sf::Color(255, 255, 255, 100));
+            buttons.push_back(btn);
+            country = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+            country->setOutlineThickness(0.0f);
+            buttons.push_back(country);
+            btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Enter date of birth(dd/mm/yyyy)", font, BTN_CHAR_SIZE);
+            btn->setOutlineThickness(0.0f);
+            btn->setFillColor(sf::Color(255, 255, 255, 100));
+            buttons.push_back(btn);
+            dob = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+            dob->setOutlineThickness(0.0f);
+            buttons.push_back(dob);
+            btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Is student/prof?(S/s=Student, P/p=Prof)", font, BTN_CHAR_SIZE);
+            btn->setOutlineThickness(0.0f);
+            btn->setFillColor(sf::Color(255, 255, 255, 100));
+            buttons.push_back(btn);
+            status = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+            status->setOutlineThickness(0.0f);
+            buttons.push_back(status);
+            btn = new Button(&Button::setRight, window.getSize(), BTN_SIZE, "Is male/female(M/m=Male, F/f=Female)", font, BTN_CHAR_SIZE);
+            btn->setOutlineThickness(0.0f);
+            btn->setFillColor(sf::Color(255, 255, 255, 100));
+            buttons.push_back(btn);
+            gender = new TextInput(&Button::setRight, window.getSize(), BTN_SIZE, font, BTN_CHAR_SIZE);
+            gender->setOutlineThickness(0.0f);
+            buttons.push_back(gender);
+            btn = new Button(&Button::setCenter, window.getSize(), {500.f, 50.f}, "NEXT", font, 30);
+            btn->setFillColor(sf::Color(255, 255, 255, 200));
+            btn->setOutlineThickness(0);
+            buttons.push_back(btn);
+            std::vector<TextInput*> inputs = {username, password, firstName, lastName, country, dob, status, gender};
+            while(!pageClosed)
+            {               
+                for(auto& i : inputs)
+                    i->handleEvent(event, window, keyPressed);
+                while(window.pollEvent(event))
+                {
+                    switch(event.type)
+                    {
+                        case sf::Event::Closed:
+                            window.close();
+                            return ;
+                        case sf::Event::MouseMoved:
+                            btn->windowHover(window);
+                            break;
+                        case sf::Event::MouseButtonPressed:
+                            if(event.mouseButton.button == sf::Mouse::Button::Left && btn->isMouseOver(window))
+                            {
+                                // This means the admin pressed next
+                                
+                            }
+                            break;
+                        case sf::Event::KeyPressed:
+                            if(event.key.code == sf::Keyboard::Escape)
+                            {
+                                pageClosed = true;
+                                return ;
+                            }
+                            break;
+                    }
+                }
+                for(auto& i : inputs)
+                    i->update();
+                window.clear();
+                window.draw(background);
+                for(auto& i : buttons)
+                    i->draw(window);
+                window.display();
+            }
+        }
+        void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+    }
+
+    // admin modify pages
+    namespace modify
+    {
+        void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+    }
+
+    // admin delete pages
+    namespace del
+    {
+        void userPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
     }
 }
