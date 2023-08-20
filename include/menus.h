@@ -3,6 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
+#include <string>
+#include <sstream>
 #include <sql/sqlite3.h>
 #include "button.h"
 #include "user.h"

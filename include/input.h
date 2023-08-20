@@ -20,7 +20,7 @@ public:
     void handleEvent(sf::Event&, sf::RenderWindow& window, bool& keyPressed);
     // void restartCursorTimer();
     // Getters
-    bool getSelected() const;
+    bool isSelected() const;
     std::string getText() const;
     // Setters
     void setSelected(bool);

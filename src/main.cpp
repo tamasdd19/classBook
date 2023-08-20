@@ -8,7 +8,7 @@
 #include "menus.h"
 
 // #define DEBUG 0
-// #define ADMIN 0
+#define ADMIN 0
 
 #ifdef DEBUG
 #define NAME_DEBUG "Student1" 
@@ -147,16 +147,16 @@ LoginData* loginPage(sqlite3 *db, sf::RenderWindow& window, sf::Font& font, std:
                 case sf::Event::KeyPressed:
                     if(event.key.code == sf::Keyboard::Return)
                     {
-                        if(textInput->getSelected() && passInput->getText().empty() && textInput->getText().size()>1)
+                        if(textInput->isSelected() && passInput->getText().empty() && textInput->getText().size()>1)
                         {
                             textInput->setSelected(false);
                             passInput->setSelected(true);
                         }
                         else
                         {
-                            if(passInput->getSelected())
+                            if(passInput->isSelected())
                                 passInput->setSelected(false);
-                            if(textInput->getSelected())
+                            if(textInput->isSelected())
                                 textInput->setSelected(false);
                             std::string user = textInput->getText();
                             std::string pass = passInput->getText();

@@ -234,6 +234,13 @@ bool Button::isTextOutOfBounds()
     return false;
 }
 
+bool Button::isOutlined() const
+{
+    if(m_button.getOutlineThickness() > 0.f)
+        return true;
+    return false;
+}
+
 void Button::setTextInBounds(const sf::Vector2f& buffer)
 {
     sf::FloatRect buttonBounds = m_button.getGlobalBounds();

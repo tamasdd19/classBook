@@ -40,6 +40,7 @@ public:
     sf::Vector2f getPosition() const;
     sf::Vector2f getSize() const;
     bool isTextOutOfBounds();
+    bool isOutlined() const;
     void setTextInBounds(const sf::Vector2f& buffer);
     void windowHover(sf::RenderWindow& window);
 private:

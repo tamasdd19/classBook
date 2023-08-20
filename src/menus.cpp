@@ -866,7 +866,7 @@ void giveGradeMenu(Course* course, Student* student, Button** otherButtons, sf::
                     {
                         if(!textInput.getText().empty())
                         {
-                            if(textInput.getSelected())
+                            if(textInput.isSelected())
                                 textInput.setSelected(false);
                             try 
                             {
@@ -1275,13 +1275,16 @@ namespace adminPage
         {
             #define BTN_SIZE {500.f, 40.f}
             #define BTN_CHAR_SIZE 25
+
             Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+
             sf::Event event;
             std::vector<Button*> buttons;
             Button* btn;
             TextInput *username, *password, *firstName, *lastName, *country, *dob, *status, *gender;
-            bool pageClosed = false;                                                // status reffers to wheter is a student or a prof
+            bool pageClosed = false;                                             // status reffers to wheter is a student or a prof
             bool keyPressed = false;
+
             buttons.push_back(titleBtn);
             btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter username", font, BTN_CHAR_SIZE);
             btn->setOutlineThickness(0.0f);
@@ -1345,6 +1348,7 @@ namespace adminPage
             btn->setOutlineThickness(0);
             buttons.push_back(btn);
             std::vector<TextInput*> inputs = {username, password, firstName, lastName, country, dob, status, gender};
+            bool isStudent = false;
             while(!pageClosed)
             {               
                 for(auto& i : inputs)
@@ -1363,7 +1367,93 @@ namespace adminPage
                             if(event.mouseButton.button == sf::Mouse::Button::Left && btn->isMouseOver(window))
                             {
                                 // This means the admin pressed next
-                                
+                                bool isAnyOptionWrong = false;
+                                for(auto& i : inputs)
+                                {
+                                    if(i->isSelected())
+                                        i->setSelected(false);
+                                    if(i->getText().empty()) // Checks if an input box is empty
+                                    {
+                                        i->setOutlineThickness(3.f);
+                                        i->setOutlineColor(sf::Color::Red);
+                                        isAnyOptionWrong = true;
+                                    }
+                                    else if(i->isOutlined()) // Checks if an input box was empty before and now it's not empty anymore
+                                    {
+                                        i->setOutlineThickness(0.f);
+                                    }
+                                    
+                                    if(i == dob)
+                                    {
+                                        std::istringstream ss(dob->getText());
+                                        std::string day, month, year;
+
+                                        std::getline(ss, day, '/');
+                                        std::getline(ss, month, '/');
+                                        std::getline(ss, year);
+
+                                        if((day.empty() || month.empty() || year.empty()) || (day.size() > 2 || month.size() > 2 || year.size() != 4))
+                                        {
+                                            i->setOutlineThickness(3.f);
+                                            i->setOutlineColor(sf::Color::Red);
+                                            isAnyOptionWrong = true;
+                                        }
+                                        else
+                                        {
+                                            try
+                                            {
+                                                std::stoi(day);
+                                                std::stoi(month);
+                                                std::stoi(year);
+                                            }
+                                            catch(const std::exception& e)
+                                            {
+                                                isAnyOptionWrong = true;
+                                                i->setOutlineThickness(3.f);
+                                                i->setOutlineColor(sf::Color::Red);
+                                            }
+                                        }
+                                    }
+                                    else if(i == status)
+                                    {
+                                        char c = static_cast<char>(std::tolower(status->getText()[0]));
+                                        if(c != 'p' && c != 's')
+                                        {
+                                            // Typed something other than p or s in the input box
+                                            i->setOutlineThickness(3.f);
+                                            i->setOutlineColor(sf::Color::Red);
+                                            isAnyOptionWrong = true;
+                                        }
+                                        else if(c == 's')
+                                        {
+                                            isStudent = true;
+                                        }
+                                    }
+                                    else if(i == gender)
+                                    {
+                                        char c = static_cast<char>(std::tolower(gender->getText()[0]));
+                                        if(c != 'm' && c != 'f')
+                                        {
+                                            // Typed something other than p or s in the input box
+                                            i->setOutlineThickness(3.f);
+                                            i->setOutlineColor(sf::Color::Red);
+                                            isAnyOptionWrong = true;
+                                        }
+                                    }
+                                }
+                                if(!isAnyOptionWrong)
+                                {
+                                    // All the options are right, now I need to have 2 different screens, 1 for student, 1 for professor
+                                    // In case of the student I have to select it's major, and for the professor I need to select the courses the prof will be teaching
+                                    if(isStudent)
+                                    {
+                                        // Here will go the student screen
+                                    }
+                                    else
+                                    {
+                                        // Here will go the prof screen
+                                    }
+                                }
                             }
                             break;
                         case sf::Event::KeyPressed:

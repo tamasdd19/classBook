@@ -106,11 +106,11 @@ void TextInput::handleEvent(sf::Event& event, sf::RenderWindow& window, bool& ke
         case sf::Event::MouseButtonPressed:
             if (event.mouseButton.button == sf::Mouse::Left)
             {
-                if(this->isMouseOver(window) && !this->getSelected())
+                if(this->isMouseOver(window) && !this->isSelected())
                 {   
                     this->setSelected(true);
                 }
-                else if(this->getSelected() && !this->isMouseOver(window))
+                else if(this->isSelected() && !this->isMouseOver(window))
                 {
                     this->setSelected(false);
                 }
@@ -183,7 +183,7 @@ void TextInput::update()
 // }
 
 // Getters
-bool TextInput::getSelected() const
+bool TextInput::isSelected() const
 {
     return m_selected;
 }
