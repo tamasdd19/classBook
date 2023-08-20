@@ -7,7 +7,7 @@
 #include "databaseStuff.h"
 #include "menus.h"
 
-#define DEBUG 0
+// #define DEBUG 0
 // #define ADMIN 0
 
 #ifdef DEBUG
