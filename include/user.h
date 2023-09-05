@@ -11,6 +11,7 @@ class User
 {
 public:
     User(const std::string& name);
+    User(const std::string& username, const std::string& firstName, const std::string& lastName, const std::string& countryOrigin, bool isMale, Date* dob);
     User();
     // Getters
     std::string getUsername() const;
@@ -26,12 +27,12 @@ public:
     void setFirstName(const std::string&);
     void setLastName(const std::string&);
     void setCountryOrigin(const std::string&);
-    void setMale(bool);
+    void setIsMale(bool);
     void setDateOfBirth(int, int, int); // I'm gonna read the date of birth from the users table, which is a char** and I'm gonna convert in the function
 private:
     int m_ID = -1;
     std::string m_username, m_firstName, m_lastName, m_countryOrigin;
-    bool m_male = 1; // 1 = M; 0 = F
+    bool m_isMale = 1; // 1 = M; 0 = F
     Date* m_DoB = nullptr; // date of birth
 };
 

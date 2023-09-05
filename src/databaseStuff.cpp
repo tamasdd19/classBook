@@ -30,7 +30,7 @@ int callbackFunction(void* data, int argc, char** argv, char** columnNames)
                     loginData->user->setId(std::stoi(argv[i-1]));
                     loginData->user->setFirstName(argv[i+4]);
                     loginData->user->setLastName(argv[i+5]);
-                    loginData->user->setMale(std::stoi(argv[i+9]));
+                    loginData->user->setIsMale(std::stoi(argv[i+9]));
                     loginData->user->setCountryOrigin(argv[i+10]);
                     break;
                 }
@@ -96,6 +96,15 @@ int checkIfGradeExists(void* data, int argc, char** argv, char** columnNames)
 {
     bool* check = static_cast<bool*>(data);
     *check = true;
+    return 0;
+}
+
+int getAllFaculties(void* data, int argc, char** argv, char** columnNames)
+{
+    std::vector<Faculty*>* faculties = static_cast<std::vector<Faculty*>*>(data);
+
+    faculties->push_back(new Faculty(std::stoi(argv[0]), argv[1]));
+
     return 0;
 }
 

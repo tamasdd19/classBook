@@ -48,11 +48,15 @@ int main()
     LoginData* userData = loginPage(db, window, font, buttonsToDraw);
 
     if(!window.isOpen()) // So it doensn't crash if you close the window in the login page
+    {
+        sqlite3_close(db);
         return 0;
+    }
 
     if(userData->isAdmin) // Admin side
     {
         adminPage::mainPage(window, font, db);
+        sqlite3_close(db);
         return 0;
     }
 
@@ -60,17 +64,13 @@ int main()
 
     if(userData->isStudent) // Student side
     {
-        std::vector<Button*> gradeButtons;
-
-        gradeButtons = studentGradesButtons(window, userData->student, font, db);
+        std::vector<Button*> gradeButtons = studentGradesButtons(window, userData->student, font, db);
 
         studentPage::mainPage(db, window, font, buttonsToDraw, userDataInfo, gradeButtons, userData->student);   
     }
     else // Professor side
     {
-        std::vector<Button*> gradeBookButtons;
-
-        gradeBookButtons = profCoursesButtons(window, userData->professor, font, db);
+        std::vector<Button*> gradeBookButtons = profCoursesButtons(window, userData->professor, font, db);
 
         profPage::mainPage(db, window, font, buttonsToDraw, userDataInfo, gradeBookButtons, userData->professor);
     }

@@ -1285,6 +1285,7 @@ namespace adminPage
             bool pageClosed = false;                                             // status reffers to wheter is a student or a prof
             bool keyPressed = false;
 
+            // Setting up the buttons that appear on the screen
             buttons.push_back(titleBtn);
             btn = new Button(&Button::setLeft, window.getSize(), BTN_SIZE, "Enter username", font, BTN_CHAR_SIZE);
             btn->setOutlineThickness(0.0f);
@@ -1349,6 +1350,7 @@ namespace adminPage
             buttons.push_back(btn);
             std::vector<TextInput*> inputs = {username, password, firstName, lastName, country, dob, status, gender};
             bool isStudent = false;
+            Date* DoB = nullptr;
             while(!pageClosed)
             {               
                 for(auto& i : inputs)
@@ -1367,6 +1369,8 @@ namespace adminPage
                             if(event.mouseButton.button == sf::Mouse::Button::Left && btn->isMouseOver(window))
                             {
                                 // This means the admin pressed next
+                                /* Debugging purposes
+
                                 bool isAnyOptionWrong = false;
                                 for(auto& i : inputs)
                                 {
@@ -1402,9 +1406,10 @@ namespace adminPage
                                         {
                                             try
                                             {
-                                                std::stoi(day);
-                                                std::stoi(month);
-                                                std::stoi(year);
+                                                int int_day = std::stoi(day);
+                                                int int_month = std::stoi(month);
+                                                int int_year = std::stoi(year);
+                                                DoB = new Date(int_day, int_month, int_year);
                                             }
                                             catch(const std::exception& e)
                                             {
@@ -1441,25 +1446,38 @@ namespace adminPage
                                         }
                                     }
                                 }
-                                if(!isAnyOptionWrong)
+                                */
+                                if(true)//(!isAnyOptionWrong)
                                 {
+                                    // bool isMale = (static_cast<char>(std::tolower(gender->getText()[0])) == 'm') ? true : false;
+                                    // User* user = new User(username->getText(), firstName->getText(), lastName->getText(), country->getText(), isMale, DoB);
+                                    bool isMale = true;
+                                    Date* dob = new Date(10, 10, 10);
+                                    User* user = new User("test", "test", "test", "test", true, dob);
+                                    isStudent = true;
                                     // All the options are right, now I need to have 2 different screens, 1 for student, 1 for professor
                                     // In case of the student I have to select it's major, and for the professor I need to select the courses the prof will be teaching
                                     if(isStudent)
                                     {
                                         // Here will go the student screen
+                                        // Will be 2 screens, 1 where you select the user faculty and another
+                                        // where you select the major by the faculty already selected
+                                        studentMenu(window, background, font, db, titleBtn, user);
                                     }
                                     else
                                     {
                                         // Here will go the prof screen
+                                        professorMenu(window, background, font, db, titleBtn, user);
                                     }
+                                    if(!window.isOpen())
+                                        return ;
                                 }
                             }
                             break;
                         case sf::Event::KeyPressed:
                             if(event.key.code == sf::Keyboard::Escape)
                             {
-                                pageClosed = true;
+                                // Will have to find a way to delete the buttons when I exit the page
                                 return ;
                             }
                             break;
@@ -1483,6 +1501,85 @@ namespace adminPage
             
         }
         void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons)
+        {
+            
+        }
+        void studentMenu(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn, User* user)
+        {
+            sf::Event event;
+
+            // First I will need to create a menu to select from the different faculties
+            // And then I will need to create another menu to select a major from that faculty
+
+            bool isFacultyMenu = true;
+            bool isMajorMenu = false;
+
+            std::vector<Faculty*> facultiesOptions;
+            std::vector<Button*> facultiesButtons;
+            std::vector<Major*> majorsOptions;
+            std::vector<Button*> majorsButtons;
+            Button* btn;
+
+            Button::setButtonsTotalHeight(titleBtn->getSize().y + 50.f);
+
+            int rc = sqlite3_exec(db, "SELECT * FROM faculties;", getAllFaculties, &facultiesOptions, 0);
+
+            if(rc != SQLITE_OK)
+            {
+                std::cout << "There was an error trying to get the faculties for the student add page";
+                return ;
+            }
+
+            facultiesButtons.push_back(titleBtn);
+
+            for(auto& i : facultiesOptions)
+            {
+                btn = new Button(&Button::setCenter, window.getSize(), {300.f, 75.f}, i->getName(), font);
+                facultiesButtons.push_back(btn);
+            }
+
+            while(window.isOpen())
+            {
+                while(isFacultyMenu)
+                {
+                    while(window.pollEvent(event))
+                    {
+                        switch(event.type)
+                        {
+                            case sf::Event::Closed:
+                                window.close();
+                                return ;
+                                break;
+                        }
+                    }
+                    window.clear();
+                    window.draw(background);
+
+                    for(auto& i : facultiesButtons)
+                        i->draw(window);
+
+                    window.display();
+                }
+                while(isMajorMenu)
+                {
+                    while(window.pollEvent(event))
+                    {
+                        switch(event.type)
+                        {
+                            case sf::Event::Closed:
+                                window.close();
+                                return ;
+                                break;
+                        }
+                    }
+                    window.clear();
+                    window.draw(background);
+
+                    window.display();
+                }
+            }
+        }
+        void professorMenu(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn, User* user)
         {
             
         }

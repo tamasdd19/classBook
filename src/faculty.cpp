@@ -11,6 +11,12 @@ Faculty::Faculty(const std::string& name)
 
 }
 
+Faculty::Faculty(int id, const std::string& name)
+    : m_ID(id), m_facultyName(name)
+{
+    
+}
+
 Faculty::Faculty(const std::string& name, const std::vector<Major*>& majors)
     : m_facultyName(name), m_majors(majors)
 {
@@ -36,4 +42,19 @@ void Faculty::addMajor(Major& major)
 void Faculty::setMajors(const std::vector<Major*>& majors)
 {
     m_majors = majors;
+}
+
+void Faculty::setId(int id)
+{
+    m_ID = id;
+}
+
+int Faculty::getId() const
+{
+    return m_ID;
+}
+
+std::string Faculty::getName() const
+{
+    return m_facultyName;
 }

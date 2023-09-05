@@ -11,6 +11,13 @@ User::User(const std::string& name)
     m_username = name;
 }
 
+User::User(const std::string& username, const std::string& firstName, const std::string& lastName, const std::string& countryOrigin, bool isMale, Date* dob)
+    : m_username(username), m_firstName(firstName), m_lastName(lastName), m_countryOrigin(countryOrigin), m_isMale(isMale), m_DoB(dob)
+{
+
+}
+
+
 // Getters
 std::string User::getUsername() const
 {
@@ -36,7 +43,7 @@ std::string User::getCountryOrigin() const
 }
 bool User::isMale() const
 {
-    return m_male;
+    return m_isMale;
 }
 Date* User::getDateOfBirth() const
 {
@@ -66,9 +73,9 @@ void User::setCountryOrigin(const std::string& country)
 {
     m_countryOrigin = country;
 }
-void User::setMale(bool sexM)
+void User::setIsMale(bool sexM)
 {
-    m_male = sexM;
+    m_isMale = sexM;
 }
 
 void User::setDateOfBirth(int day, int month, int year)

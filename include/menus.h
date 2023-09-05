@@ -10,6 +10,8 @@
 #include "user.h"
 #include "professor.h"
 #include "student.h"
+#include "faculty.h"
+#include "major.h"
 #include "databaseStuff.h"
 #include "input.h"
 
@@ -43,6 +45,8 @@ namespace adminPage
         void facultyPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons);
         void coursePage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons);
         void majorPage(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, std::vector<Button*>& mainButtons);
+        void studentMenu(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn, User* user);
+        void professorMenu(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn, User* user);
     }
 
     namespace modify 
