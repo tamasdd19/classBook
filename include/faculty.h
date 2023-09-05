@@ -14,13 +14,15 @@ public:
     Faculty(const std::vector<Major*>&);
     Faculty();
     void addMajor(Major&);
+    // Setters
     void setName(const std::string&);
     void setMajors(const std::vector<Major*>&);
     void setId(int id);
+    // Getters
     int getId() const;
     std::string getName() const;
 private:
     std::vector<Major*> m_majors;
     int m_ID = -1;
-    std::string m_facultyName;
+    std::string m_facultyName = "";
 };
