@@ -10,6 +10,14 @@ Major::Major(const std::string& name)
 {
 
 }
+
+Major::Major(int majorId, const std::string& majorName)
+    : m_majorName(majorName), m_majorId(majorId)
+{
+
+}
+
+
 Major::Major(int id, const std::string& name, int year)
     : m_majorId(id), m_majorName(name), m_majorYear(year)
 {

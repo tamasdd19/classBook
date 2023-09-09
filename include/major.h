@@ -10,6 +10,7 @@ public:
     Major(const std::string&);
     Major(int, const std::string&, int);
     Major(const std::string&, int, const std::vector<Course*>&);
+    Major(int majorId, const std::string& majorName);
     Major();
     // Getters
     std::string getName() const;

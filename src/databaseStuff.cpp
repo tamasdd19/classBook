@@ -108,6 +108,15 @@ int getAllFaculties(void* data, int argc, char** argv, char** columnNames)
     return 0;
 }
 
+int getMajorByFacultyId(void* data, int argc, char** argv, char** columnNames)
+{
+    std::vector<Major*>* majors = static_cast<std::vector<Major*>*>(data);
+
+    majors->push_back(new Major(std::stoi(argv[0]), argv[1]));
+
+    return 0;
+}
+
 // Encrypt a password using AES
 std::string encryptPassword(const std::string& password, const std::string& key)
 {

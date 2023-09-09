@@ -1521,10 +1521,12 @@ namespace adminPage
             Button* btn, *backBtn;
 
             facultiesButtons.push_back(titleBtn);
+            majorsButtons.push_back(titleBtn);
 
             backBtn = new Button({490.f, 635.f}, {300.f, 75.f}, "Back", font);
 
             facultiesButtons.push_back(backBtn);
+            majorsButtons.push_back(backBtn);
 
             Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
 
@@ -1572,86 +1574,203 @@ namespace adminPage
                 }
             }
 
-            while(isFacultyMenu)
+            while(window.isOpen())
             {
-                while(window.pollEvent(event))
+                while(isFacultyMenu)
                 {
-                    auto iter = facultiesButtons.begin();
-
-                    switch(event.type)
+                    while(window.pollEvent(event))
                     {
-                        default:
-                            break;
-                        case sf::Event::Closed:
-                            window.close();
-                            return ;
-                            break;
-                        case sf::Event::KeyPressed:
-                            if(event.key.code == sf::Keyboard::Escape)
-                            {
-                                return ;
-                            }
-                            break;
-                        case sf::Event::MouseMoved:
-                            ++iter; 
+                        auto iter = facultiesButtons.begin();
 
-                            for(; iter < facultiesButtons.end(); ++iter)
-                            {
-                                auto& i = *iter;
-                                i->windowHover(window);
-                            }
-                            break;
-                        case sf::Event::MouseButtonPressed:
-                            if(event.mouseButton.button == sf::Mouse::Button::Left)
-                            {
-                                if(backBtn->isMouseOver(window))
+                        switch(event.type)
+                        {
+                            default:
+                                break;
+                            case sf::Event::Closed:
+                                window.close();
+                                return ;
+                                break;
+                            case sf::Event::KeyPressed:
+                                if(event.key.code == sf::Keyboard::Escape)
                                 {
                                     return ;
                                 }
-                                ++iter;
+                                break;
+                            case sf::Event::MouseMoved:
+                                ++iter; 
 
                                 for(; iter < facultiesButtons.end(); ++iter)
                                 {
                                     auto& i = *iter;
-                                    if(i->isMouseOver(window))
+                                    i->windowHover(window);
+                                }
+                                break;
+                            case sf::Event::MouseButtonPressed:
+                                if(event.mouseButton.button == sf::Mouse::Button::Left)
+                                {
+                                    if(backBtn->isMouseOver(window))
                                     {
-                                        // std::distance calculates the distance between the back button and the actual iterator
-                                        // so I know at what distance I am at, so I can get the id for that faculty
-                                        auto index = std::distance(facultiesButtons.begin()+2, iter);
+                                        return ;
+                                    }
+                                    ++iter;
 
-                                        std::cout << facultiesOptions[index]->getId() << std::endl;
+                                    for(; iter < facultiesButtons.end(); ++iter)
+                                    {
+                                        auto& i = *iter;
+                                        if(i->isMouseOver(window))
+                                        {
+                                            // std::distance calculates the distance between the back button and the actual iterator
+                                            // so I know at what distance I am at, so I can get the id for that faculty
+                                            auto index = std::distance(facultiesButtons.begin()+2, iter);
+
+                                            int facultyId =  facultiesOptions[index]->getId();
+                                            std::string majorsQuery = "SELECT * FROM major WHERE facultyId = " + std::to_string(facultyId) + ";";
+
+                                            rc = sqlite3_exec(db, majorsQuery.c_str(), getMajorByFacultyId, &majorsOptions, 0);
+
+                                            if(rc != SQLITE_OK)
+                                            {
+                                                std::cout << "There was an error trying to extract the majors from the database\n";
+                                                return ;
+                                            }
+
+                                            Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+
+
+                                            if(majorsOptions.size() < 6) 
+                                            {   // In case we only have 5 options, we can show them in the center as such
+                                                for(auto& i : majorsOptions)
+                                                {
+                                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 75.f}, i->getName(), font);
+                                                    btn->setOutlineThickness(0);
+                                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                                    majorsButtons.push_back(btn);
+                                                }
+                                            }
+                                            else
+                                            {   // In case we have more than 5 options, we will arrange the options from left->center->right
+                                                int k = 0;
+                                                for(int j = 0; (j < 5) && (k < majorsOptions.size()); ++j, ++k)
+                                                {
+                                                    btn = new Button(&Button::setLeft, window.getSize(), {300.f, 75.f}, majorsOptions[k]->getName(), font);
+                                                    btn->setOutlineThickness(0);
+                                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                                    majorsButtons.push_back(btn);
+                                                }
+                                                Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+                                                for(int j = 0; (j < 5) && (k < majorsOptions.size()); ++j, ++k)
+                                                {
+                                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 75.f}, majorsOptions[k]->getName(), font);
+                                                    btn->setOutlineThickness(0);
+                                                    majorsButtons.push_back(btn);
+                                                }
+                                                Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+                                                for(int j = 0; (j < 5) && (k < majorsOptions.size()); ++j, ++k)
+                                                {
+                                                    btn = new Button(&Button::setRight, window.getSize(), {300.f, 75.f}, majorsOptions[k]->getName(), font);
+                                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                                    majorsButtons.push_back(btn);
+                                                }
+                                            }
+                                            isMajorMenu = true;
+                                            isFacultyMenu = false;
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                            break;
+                                break;
+                        }
                     }
+                    window.clear();
+                    window.draw(background);
+
+                    for(auto& i : facultiesButtons)
+                        i->draw(window);
+
+                    window.display();
                 }
-                window.clear();
-                window.draw(background);
-
-                for(auto& i : facultiesButtons)
-                    i->draw(window);
-
-                window.display();
-            }
-            while(isMajorMenu)
-            {
-                while(window.pollEvent(event))
+                while(isMajorMenu)
                 {
-                    switch(event.type)
+                    while(window.pollEvent(event))
                     {
-                        case sf::Event::Closed:
-                            window.close();
-                            return ;
-                            break;
-                    }
-                }
-                window.clear();
-                window.draw(background);
+                        auto iter = majorsButtons.begin();
 
-                window.display();
-            }
-            
+                        switch(event.type)
+                        {
+                            case sf::Event::Closed:
+                                window.close();
+                                return ;
+                                break;
+                            case sf::Event::MouseMoved:
+                                ++iter; 
+
+                                for(; iter < majorsButtons.end(); ++iter)
+                                {
+                                    auto& i = *iter;
+                                    i->windowHover(window);
+                                }
+                                break;
+                            case sf::Event::MouseButtonPressed:
+                                if(event.mouseButton.button == sf::Mouse::Button::Left)
+                                {
+                                    if(backBtn->isMouseOver(window))
+                                    {
+                                        isFacultyMenu = true;
+                                        isMajorMenu = false;
+                                        for(int i = 0; i < majorsOptions.size(); i++)
+                                        {
+                                            delete majorsButtons[majorsButtons.size()-1];
+                                            majorsButtons.pop_back();
+                                        }                                        
+                                        majorsOptions.clear();
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ++iter;
+
+                                        for(; iter < majorsButtons.end(); ++iter)
+                                        {
+                                            auto& i = *iter;
+                                            if(i->isMouseOver(window))
+                                            {
+                                                // std::distance calculates the distance between the back button and the actual iterator
+                                                // so I know at what distance I am at, so I can get the id for that faculty
+                                                auto index = std::distance(majorsButtons.begin()+2, iter);
+
+                                                int majorId =  majorsOptions[index]->getId();
+
+                                                // This means that now I have all the data I need to add the user to the data base!
+                                                
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            case sf::Event::KeyPressed:
+                                if(event.key.code == sf::Keyboard::Escape)
+                                {
+                                    isFacultyMenu = true;
+                                    isMajorMenu = false;
+                                    for(int i = 0; i < majorsOptions.size(); i++)
+                                    {
+                                        delete majorsButtons[majorsButtons.size()-1];
+                                        majorsButtons.pop_back();
+                                    }
+                                    majorsOptions.clear();
+                                    break;
+                                }
+                        }
+                    }
+                    window.clear();
+                    window.draw(background);
+
+                    for(auto& i : majorsButtons)
+                        i->draw(window);
+
+                    window.display();
+                }
+            }      
         }
         void professorMenu(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn, User* user)
         {
