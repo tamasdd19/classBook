@@ -1741,7 +1741,25 @@ namespace adminPage
                                                 int majorId =  majorsOptions[index]->getId();
 
                                                 // This means that now I have all the data I need to add the user to the data base!
+                                                // The default password will be newUser123 I will create an option in the login page
+                                                // To reset your password, but for now this will do
+                                                std::string defaultPassword = "newUser123";
+
+                                                std::string sqlQuery = "INSERT INTO users (username, password, student, majorId, firstName, lastName, birthDay, birthMonth, birthYear, sexM, countryOrigin) VALUES ('" + 
+                                                                        user->getUsername() + "', '" + defaultPassword + "', '" + "1'" + ", '" + std::to_string(majorId) + "', '" + user->getFirstName() + "', '" + 
+                                                                        user->getLastName() + "', '" + std::to_string(user->getDateOfBirth()->getDay()) + "', '" + std::to_string(user->getDateOfBirth()->getMonth()) +
+                                                                        "', '" + std::to_string(user->getDateOfBirth()->getYear()) + "', '" + (user->isMale() ? "1" : "0") + "', '" + user->getCountryOrigin() + "');";
                                                 
+                                                rc = sqlite3_exec(db, sqlQuery.c_str(), 0, 0, 0);
+                                                if(rc != SQLITE_OK)
+                                                {
+                                                    std::cout << "There was an error trying to add the user to the database\n";
+                                                }
+                                                else
+                                                {
+                                                    // This means the user was added with success!
+                                                    
+                                                }
                                             }
                                         }
                                     }
