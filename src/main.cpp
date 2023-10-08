@@ -8,7 +8,7 @@
 #include "menus.h"
 
 // #define DEBUG 0
-#define ADMIN 0
+// #define ADMIN 0
 
 #ifdef DEBUG
 #define NAME_DEBUG "Student1" 
@@ -250,4 +250,5 @@ LoginData* loginPage(sqlite3 *db, sf::RenderWindow& window, sf::Font& font, std:
             i->draw(window);
         window.display();
     }
+    return userData;
 }
