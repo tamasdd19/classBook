@@ -1454,7 +1454,7 @@ namespace adminPage
                                     bool isMale = true;
                                     Date* dob = new Date(10, 10, 10);
                                     User* user = new User("test", "test", "test", "test", true, dob);
-                                    isStudent = true;
+                                    isStudent = false;
                                     // All the options are right, now I need to have 2 different screens, 1 for student, 1 for professor
                                     // In case of the student I have to select it's major, and for the professor I need to select the courses the prof will be teaching
                                     if(isStudent)
@@ -1758,6 +1758,8 @@ namespace adminPage
                                                 else
                                                 {
                                                     // This means the user was added with success!
+                                                    // Will have to add a button saying if the user was added with succes or if there was an error
+                                                    // trying to add the user, will do that later, or a sepparate menu or something to notify the admin
                                                     
                                                 }
                                             }
@@ -1792,7 +1794,292 @@ namespace adminPage
         }
         void professorMenu(sf::RenderWindow& window, sf::Sprite& background, sf::Font& font, sqlite3* db, Button* titleBtn, User* user)
         {
+            sf::Event event;
+
+            // First I will need to create a menu to select from the different faculties
+            // And then I will need to create another menu to select multiple courses that are not selected from that faculty
             
+
+            bool isFacultyMenu = true;
+            bool isMajorMenu = false;
+
+            std::vector<Faculty*> facultiesOptions;
+            std::vector<Button*> facultiesButtons;
+            std::vector<Major*> majorsOptions;
+            std::vector<Button*> majorsButtons;
+            Button* btn, *backBtn;
+
+            facultiesButtons.push_back(titleBtn);
+            majorsButtons.push_back(titleBtn);
+
+            backBtn = new Button({490.f, 635.f}, {300.f, 75.f}, "Back", font);
+
+            facultiesButtons.push_back(backBtn);
+            majorsButtons.push_back(backBtn);
+
+            Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+
+            int rc = sqlite3_exec(db, "SELECT * FROM faculties;", getAllFaculties, &facultiesOptions, 0);
+
+            if(rc != SQLITE_OK)
+            {
+                std::cout << "There was an error trying to get the faculties for the student add page";
+                return ;
+            }
+
+            if(facultiesOptions.size() < 6) 
+            {   // In case we only have 5 options, we can show them in the center as such
+                for(auto& i : facultiesOptions)
+                {
+                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 75.f}, i->getName(), font);
+                    btn->setOutlineThickness(0);
+                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                    facultiesButtons.push_back(btn);
+                }
+            }
+            else
+            {   // In case we have more than 5 options, we will arrange the options from left->center->right
+                int k = 0;
+                for(int j = 0; (j < 5) && (k < facultiesOptions.size()); ++j, ++k)
+                {
+                    btn = new Button(&Button::setLeft, window.getSize(), {300.f, 75.f}, facultiesOptions[k]->getName(), font);
+                    btn->setOutlineThickness(0);
+                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                    facultiesButtons.push_back(btn);
+                }
+                Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+                for(int j = 0; (j < 5) && (k < facultiesOptions.size()); ++j, ++k)
+                {
+                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 75.f}, facultiesOptions[k]->getName(), font);
+                    btn->setOutlineThickness(0);
+                    facultiesButtons.push_back(btn);
+                }
+                Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+                for(int j = 0; (j < 5) && (k < facultiesOptions.size()); ++j, ++k)
+                {
+                    btn = new Button(&Button::setRight, window.getSize(), {300.f, 75.f}, facultiesOptions[k]->getName(), font);
+                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                    facultiesButtons.push_back(btn);
+                }
+            }
+
+            while(window.isOpen())
+            {
+                while(isFacultyMenu)
+                {
+                    while(window.pollEvent(event))
+                    {
+                        auto iter = facultiesButtons.begin();
+
+                        switch(event.type)
+                        {
+                            default:
+                                break;
+                            case sf::Event::Closed:
+                                window.close();
+                                return ;
+                                break;
+                            case sf::Event::KeyPressed:
+                                if(event.key.code == sf::Keyboard::Escape)
+                                {
+                                    return ;
+                                }
+                                break;
+                            case sf::Event::MouseMoved:
+                                ++iter; 
+
+                                for(; iter < facultiesButtons.end(); ++iter)
+                                {
+                                    auto& i = *iter;
+                                    i->windowHover(window);
+                                }
+                                break;
+                            case sf::Event::MouseButtonPressed:
+                                if(event.mouseButton.button == sf::Mouse::Button::Left)
+                                {
+                                    if(backBtn->isMouseOver(window))
+                                    {
+                                        return ;
+                                    }
+                                    ++iter;
+
+                                    for(; iter < facultiesButtons.end(); ++iter)
+                                    {
+                                        auto& i = *iter;
+                                        if(i->isMouseOver(window))
+                                        {
+                                            // std::distance calculates the distance between the back button and the actual iterator
+                                            // so I know at what distance I am at, so I can get the id for that faculty
+                                            auto index = std::distance(facultiesButtons.begin()+2, iter);
+
+                                            int facultyId =  facultiesOptions[index]->getId();
+                                            std::string majorsQuery = "SELECT * FROM major WHERE facultyId = " + std::to_string(facultyId) + ";";
+
+                                            rc = sqlite3_exec(db, majorsQuery.c_str(), getMajorByFacultyId, &majorsOptions, 0);
+
+                                            if(rc != SQLITE_OK)
+                                            {
+                                                std::cout << "There was an error trying to extract the majors from the database\n";
+                                                return ;
+                                            }
+
+                                            Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+
+
+                                            if(majorsOptions.size() < 6) 
+                                            {   // In case we only have 5 options, we can show them in the center as such
+                                                for(auto& i : majorsOptions)
+                                                {
+                                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 75.f}, i->getName(), font);
+                                                    btn->setOutlineThickness(0);
+                                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                                    majorsButtons.push_back(btn);
+                                                }
+                                            }
+                                            else
+                                            {   // In case we have more than 5 options, we will arrange the options from left->center->right
+                                                int k = 0;
+                                                for(int j = 0; (j < 5) && (k < majorsOptions.size()); ++j, ++k)
+                                                {
+                                                    btn = new Button(&Button::setLeft, window.getSize(), {300.f, 75.f}, majorsOptions[k]->getName(), font);
+                                                    btn->setOutlineThickness(0);
+                                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                                    majorsButtons.push_back(btn);
+                                                }
+                                                Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+                                                for(int j = 0; (j < 5) && (k < majorsOptions.size()); ++j, ++k)
+                                                {
+                                                    btn = new Button(&Button::setCenter, window.getSize(), {300.f, 75.f}, majorsOptions[k]->getName(), font);
+                                                    btn->setOutlineThickness(0);
+                                                    majorsButtons.push_back(btn);
+                                                }
+                                                Button::setButtonsTotalHeight(titleBtn->getSize().y + 35.f);
+                                                for(int j = 0; (j < 5) && (k < majorsOptions.size()); ++j, ++k)
+                                                {
+                                                    btn = new Button(&Button::setRight, window.getSize(), {300.f, 75.f}, majorsOptions[k]->getName(), font);
+                                                    btn->setFillColor(sf::Color(255, 255, 255, 200));
+                                                    majorsButtons.push_back(btn);
+                                                }
+                                            }
+                                            isMajorMenu = true;
+                                            isFacultyMenu = false;
+                                            break;
+                                        }
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    window.clear();
+                    window.draw(background);
+
+                    for(auto& i : facultiesButtons)
+                        i->draw(window);
+
+                    window.display();
+                }
+                while(isMajorMenu)
+                {
+                    while(window.pollEvent(event))
+                    {
+                        auto iter = majorsButtons.begin();
+
+                        switch(event.type)
+                        {
+                            case sf::Event::Closed:
+                                window.close();
+                                return ;
+                                break;
+                            case sf::Event::MouseMoved:
+                                ++iter; 
+
+                                for(; iter < majorsButtons.end(); ++iter)
+                                {
+                                    auto& i = *iter;
+                                    i->windowHover(window);
+                                }
+                                break;
+                            case sf::Event::MouseButtonPressed:
+                                if(event.mouseButton.button == sf::Mouse::Button::Left)
+                                {
+                                    if(backBtn->isMouseOver(window))
+                                    {
+                                        isFacultyMenu = true;
+                                        isMajorMenu = false;
+                                        for(int i = 0; i < majorsOptions.size(); i++)
+                                        {
+                                            delete majorsButtons[majorsButtons.size()-1];
+                                            majorsButtons.pop_back();
+                                        }                                        
+                                        majorsOptions.clear();
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        ++iter;
+
+                                        for(; iter < majorsButtons.end(); ++iter)
+                                        {
+                                            auto& i = *iter;
+                                            if(i->isMouseOver(window))
+                                            {
+                                                // std::distance calculates the distance between the back button and the actual iterator
+                                                // so I know at what distance I am at, so I can get the id for that faculty
+                                                auto index = std::distance(majorsButtons.begin()+2, iter);
+
+                                                int majorId =  majorsOptions[index]->getId();
+
+                                                // This means that now I have all the data I need to add the user to the data base!
+                                                // The default password will be newUser123 I will create an option in the login page
+                                                // To reset your password, but for now this will do
+                                                std::string defaultPassword = "newUser123";
+
+                                                std::string sqlQuery = "INSERT INTO users (username, password, student, majorId, firstName, lastName, birthDay, birthMonth, birthYear, sexM, countryOrigin) VALUES ('" + 
+                                                                        user->getUsername() + "', '" + defaultPassword + "', '" + "1'" + ", '" + std::to_string(majorId) + "', '" + user->getFirstName() + "', '" + 
+                                                                        user->getLastName() + "', '" + std::to_string(user->getDateOfBirth()->getDay()) + "', '" + std::to_string(user->getDateOfBirth()->getMonth()) +
+                                                                        "', '" + std::to_string(user->getDateOfBirth()->getYear()) + "', '" + (user->isMale() ? "1" : "0") + "', '" + user->getCountryOrigin() + "');";
+                                                
+                                                rc = sqlite3_exec(db, sqlQuery.c_str(), 0, 0, 0);
+                                                if(rc != SQLITE_OK)
+                                                {
+                                                    std::cout << "There was an error trying to add the user to the database\n";
+                                                }
+                                                else
+                                                {
+                                                    // This means the user was added with success!
+                                                    // Will have to add a button saying if the user was added with succes or if there was an error
+                                                    // trying to add the user, will do that later, or a sepparate menu or something to notify the admin
+                                                    
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                break;
+                            case sf::Event::KeyPressed:
+                                if(event.key.code == sf::Keyboard::Escape)
+                                {
+                                    isFacultyMenu = true;
+                                    isMajorMenu = false;
+                                    for(int i = 0; i < majorsOptions.size(); i++)
+                                    {
+                                        delete majorsButtons[majorsButtons.size()-1];
+                                        majorsButtons.pop_back();
+                                    }
+                                    majorsOptions.clear();
+                                    break;
+                                }
+                        }
+                    }
+                    window.clear();
+                    window.draw(background);
+
+                    for(auto& i : majorsButtons)
+                        i->draw(window);
+
+                    window.display();
+                }
+            }      
         }
     }
 
